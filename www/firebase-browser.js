@@ -129,3 +129,17 @@ exports.verifyPhoneNumber = function(number, timeOutDuration, success, error) {
         success();
     }
 };
+
+// Crashlytics
+
+exports.sendJavascriptError = function(message, fileName, stackFrames, success, error) {
+};
+
+exports.sendUserError = function(message, dictionary, success, error) {
+};
+
+exports.setCrashlyticsValue = function(name, value, success, error) {
+};
+
+exports.logCrashlytics = function(name, value, success, error) {
+};

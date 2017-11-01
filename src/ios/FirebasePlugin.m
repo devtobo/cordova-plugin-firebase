@@ -2,6 +2,8 @@
 #import <Cordova/CDV.h>
 #import "AppDelegate.h"
 #import "Firebase.h"
+#import <Crashlytics/Crashlytics.h>
+#import <Fabric/Fabric.h>
 @import FirebaseInstanceID;
 @import FirebaseMessaging;
 @import FirebaseAnalytics;
@@ -359,6 +361,84 @@ CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStat
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:value];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
     }];
+}
+
+
+#pragma mark - Crashlytics
+
+- (void)sendJavascriptError:(CDVInvokedUrlCommand *)command {
+    NSString *message = [command.arguments objectAtIndex:0];
+    NSString *fileName = [command.arguments objectAtIndex:1];
+    NSString *stackTrace = [command.arguments objectAtIndex:2];
+    
+    NSMutableArray<CLSStackFrame*> *stackFrames = [NSMutableArray array];
+    
+    if (stackTrace) {
+        NSError *error = nil;
+        NSRegularExpression *regex = [NSRegularExpression
+                                      regularExpressionWithPattern:@"(.*)@(.*):(\\d+):(\\d+)"
+                                      options:NSRegularExpressionCaseInsensitive
+                                      error:&error];
+        if (error) {
+            NSLog(@"Failed parsing stackFrame regex: %@", error);
+        }
+        else {
+            NSArray *stacks = [stackTrace componentsSeparatedByString:@"\n"];
+            for (NSString *stack in stacks) {
+                CLSStackFrame *stackFrame = [CLSStackFrame stackFrameWithSymbol:stack];
+                stackFrame.rawSymbol = stack;
+                
+                [regex enumerateMatchesInString:stack options:0 range:NSMakeRange(0, [stack length])
+                                     usingBlock:^(NSTextCheckingResult *match, NSMatchingFlags flags, BOOL *stop){
+                                         stackFrame.symbol = [stack substringWithRange:[match rangeAtIndex:1]];
+                                         stackFrame.fileName = [stack substringWithRange:[match rangeAtIndex:2]];
+                                         stackFrame.lineNumber = [[stack substringWithRange:[match rangeAtIndex:3]] intValue];
+                                         stackFrame.offset = [[stack substringWithRange:[match rangeAtIndex:4]] intValue];
+                }];
+                
+                [stackFrames addObject:stackFrame];
+            }
+        }
+    }
+    
+    [[Crashlytics sharedInstance] recordCustomExceptionName:@"JavascriptError" reason:message frameArray:stackFrames];
+    
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+
+- (void)sendUserError:(CDVInvokedUrlCommand *)command {
+    NSString *message = [command.arguments objectAtIndex:1];
+    NSDictionary *userInfo = [command.arguments objectAtIndex:1];
+    
+    NSError *error = [NSError errorWithDomain:message code:0 userInfo:userInfo];
+    [[Crashlytics sharedInstance] recordError:error];
+    
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+
+- (void)setCrashlyticsValue:(CDVInvokedUrlCommand *)command {
+    NSString *key = [command.arguments objectAtIndex:0];
+    NSObject *value = [command.arguments objectAtIndex:1];
+    
+    if (key && value) {
+        [[Crashlytics sharedInstance] setObjectValue:value forKey:key];
+    }
+    
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)logCrashlytics:(CDVInvokedUrlCommand *)command {
+    NSString *message = [command.arguments objectAtIndex:0];
+    
+    CLSLog(@"%@", message);
+    
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 @end

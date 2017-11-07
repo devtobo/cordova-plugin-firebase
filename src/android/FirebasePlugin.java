@@ -153,6 +153,23 @@ public class FirebasePlugin extends CordovaPlugin {
             this.verifyPhoneNumber(callbackContext, args.getString(0), args.getInt(1));
             return true;
         }
+        // crashlytics
+        else if (action.equals("sendJavascriptError")) {
+            this.sendJavascriptError(callbackContext, args.getString(0), args.getString(1), args.getJSONArray(2));
+            return true;
+        }
+        else if (action.equals("sendUserError")) {
+            this.sendUserError(callbackContext, args.getString(0), args.getJSONObject(1));
+            return true;
+        }
+        else if (action.equals("setCrashlyticsValue")) {
+            this.setCrashlyticsValue(callbackContext, args.getString(0), args.getString(1));
+            return true;
+        }
+        else if (action.equals("logCrashlytics")) {
+            this.logCrashlytics(callbackContext, args.getString(0));
+            return true;
+        }
         return false;
     }
 
@@ -692,5 +709,113 @@ public class FirebasePlugin extends CordovaPlugin {
                 }
             }
         });
+    }
+
+
+    ///////////////////////////
+    // Crashlytics
+
+    private void sendJavascriptError(final CallbackContext callbackContext, final String message, final String fileName, final JSONArray jsonStackFrames) {
+        cordova.getThreadPool().execute(new Runnable() {
+            public void run() {
+                try {
+
+                    System.out.println("sendJavascriptError test");
+
+                    ArrayList<StackTraceElement> stackFrameArray = new ArrayList<StackTraceElement>();
+                    int length = jsonStackFrames.length();
+                    for (int i = 0 ; i < length ; i++) {
+                        JSONObject jsonFrame = jsonStackFrames.getJSONObject(i);
+                        String declaringClass = "";
+                        String methodName = jsonFrame.optString("functionName", "-");
+                        String fileName = jsonFrame.optString("fileName", "-");
+                        int lineNumber = jsonFrame.optInt("lineNumber", 0);
+                        StackTraceElement ste = new StackTraceElement(declaringClass, methodName, fileName, lineNumber);
+                        stackFrameArray.add(ste);
+                    }
+
+                    StackTraceElement stackFrames[] = stackFrameArray.toArray(new StackTraceElement[stackFrameArray.size()]);
+                    Exception exception = new JSException(message, null, stackFrames);
+                    FirebaseCrash.report(exception);
+
+                    callbackContext.success();
+                } catch (Exception e) {
+                    callbackContext.error(e.getMessage());
+                }
+            }
+        });
+    }
+    private void sendUserError(final CallbackContext callbackContext, final String message, final JSONObject dictionary) {
+        cordova.getThreadPool().execute(new Runnable() {
+            public void run() {
+                try {
+
+                    System.out.println("sendUserError test");
+                    Exception exception = new Exception(message, new Throwable(dictionary.toString()));
+                    FirebaseCrash.report(exception);
+
+                    callbackContext.success();
+                } catch (Exception e) {
+                    callbackContext.error(e.getMessage());
+                }
+            }
+        });
+    }
+    private void setCrashlyticsValue(final CallbackContext callbackContext, final String key, final String value) {
+        cordova.getThreadPool().execute(new Runnable() {
+            public void run() {
+                try {
+
+                    System.out.println("setCrashlyticsValue test");
+                    FirebaseCrash.log("setCrashlyticsValue key=" + key + " value=" + value);
+
+                    callbackContext.success();
+                } catch (Exception e) {
+                    callbackContext.error(e.getMessage());
+                }
+            }
+        });
+    }
+    private void logCrashlytics(final CallbackContext callbackContext, final String message) {
+        cordova.getThreadPool().execute(new Runnable() {
+            public void run() {
+                try {
+
+                    System.out.println("logCrashlytics test");
+                    FirebaseCrash.log(message);
+
+                    callbackContext.success();
+                } catch (Exception e) {
+                    callbackContext.error(e.getMessage());
+                }
+            }
+        });
+    }
+
+    /*
+    else if (action.equals("sendJavascriptError")) {
+        this.sendJavascriptError(callbackContext, args.getString(0), args.getString(1), args.getString(2));
+        return true;
+    }
+    else if (action.equals("sendUserError")) {
+        this.sendUserError(callbackContext, args.getString(0), args.getJSONObject(1));
+        return true;
+    }
+    else if (action.equals("setCrashlyticsValue")) {
+        this.setCrashlyticsValue(callbackContext, args.getString(0), args.getString(1));
+        return true;
+    }
+    else if (action.equals("logCrashlytics")) {
+        this.logCrashlytics(callbackContext, args.getString(0));
+        return true;
+        */
+
+}
+
+
+class JSException extends Exception {
+    public JSException(String message, Throwable cause, StackTraceElement stackFrames[]) {
+        super(message, cause, false, true);
+        setStackTrace(stackFrames);
     }
 }

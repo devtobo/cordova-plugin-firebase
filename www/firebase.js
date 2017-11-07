@@ -142,6 +142,6 @@ exports.setCrashlyticsValue = function(name, value, success, error) {
     exec(success, error, "FirebasePlugin", "setCrashlyticsValue", [name, value]);
 };
 
-exports.logCrashlytics = function(name, value, success, error) {
-    exec(success, error, "FirebasePlugin", "logCrashlytics", [name, value]);
+exports.logCrashlytics = function(message, success, error) {
+    exec(success, error, "FirebasePlugin", "logCrashlytics", [message]);
 };

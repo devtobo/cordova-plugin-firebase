@@ -726,15 +726,20 @@ public class FirebasePlugin extends CordovaPlugin {
                     int length = jsonStackFrames.length();
                     for (int i = 0 ; i < length ; i++) {
                         JSONObject jsonFrame = jsonStackFrames.getJSONObject(i);
-                        String declaringClass = "";
-                        String methodName = jsonFrame.optString("functionName", "-");
-                        String fileName = jsonFrame.optString("fileName", "-");
+                        String declaringClass = "JSSymbol";
+                        String methodName = jsonFrame.optString("functionName", "noFunctionName");
+                        String fileName = jsonFrame.optString("fileName", "noFileName");
                         int lineNumber = jsonFrame.optInt("lineNumber", 0);
-                        StackTraceElement ste = new StackTraceElement(declaringClass, methodName, fileName, lineNumber);
+
+                        int lastIndex = fileName.lastIndexOf('/') + 1;
+                        String lastFileName = fileName.substring(lastIndex, fileName.length());
+
+                        StackTraceElement ste = new StackTraceElement(declaringClass, methodName, lastFileName, lineNumber);
                         stackFrameArray.add(ste);
                     }
 
-                    StackTraceElement stackFrames[] = stackFrameArray.toArray(new StackTraceElement[stackFrameArray.size()]);
+                    StackTraceElement[] stackFrames = stackFrameArray.toArray(new StackTraceElement[stackFrameArray.size()]);
+
                     Exception exception = new JSException(message, null, stackFrames);
                     FirebaseCrash.report(exception);
 
@@ -814,8 +819,8 @@ public class FirebasePlugin extends CordovaPlugin {
 
 
 class JSException extends Exception {
-    public JSException(String message, Throwable cause, StackTraceElement stackFrames[]) {
-        super(message, cause, false, true);
+    public JSException(String message, Throwable cause, StackTraceElement[] stackFrames) {
+        super(message, cause, true, true);
         setStackTrace(stackFrames);
     }
 }

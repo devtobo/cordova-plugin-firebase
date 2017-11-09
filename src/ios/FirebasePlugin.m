@@ -368,36 +368,24 @@ CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStat
 
 - (void)sendJavascriptError:(CDVInvokedUrlCommand *)command {
     NSString *message = [command.arguments objectAtIndex:0];
-    NSString *fileName = [command.arguments objectAtIndex:1];
-    NSString *stackTrace = [command.arguments objectAtIndex:2];
+//    NSString *fileName = [command.arguments objectAtIndex:1];
+    NSArray *stackTrace = [command.arguments objectAtIndex:2];
     
     NSMutableArray<CLSStackFrame*> *stackFrames = [NSMutableArray array];
     
     if (stackTrace) {
-        NSError *error = nil;
-        NSRegularExpression *regex = [NSRegularExpression
-                                      regularExpressionWithPattern:@"(.*)@(.*):(\\d+):(\\d+)"
-                                      options:NSRegularExpressionCaseInsensitive
-                                      error:&error];
-        if (error) {
-            NSLog(@"Failed parsing stackFrame regex: %@", error);
-        }
-        else {
-            NSArray *stacks = [stackTrace componentsSeparatedByString:@"\n"];
-            for (NSString *stack in stacks) {
-                CLSStackFrame *stackFrame = [CLSStackFrame stackFrameWithSymbol:stack];
-                stackFrame.rawSymbol = stack;
-                
-                [regex enumerateMatchesInString:stack options:0 range:NSMakeRange(0, [stack length])
-                                     usingBlock:^(NSTextCheckingResult *match, NSMatchingFlags flags, BOOL *stop){
-                                         stackFrame.symbol = [stack substringWithRange:[match rangeAtIndex:1]];
-                                         stackFrame.fileName = [stack substringWithRange:[match rangeAtIndex:2]];
-                                         stackFrame.lineNumber = [[stack substringWithRange:[match rangeAtIndex:3]] intValue];
-                                         stackFrame.offset = [[stack substringWithRange:[match rangeAtIndex:4]] intValue];
-                }];
-                
-                [stackFrames addObject:stackFrame];
-            }
+        for (NSDictionary *stackItem in stackTrace) {
+            NSString *functionName = [stackItem objectForKey:@"functionName"];
+            NSString *fileName = [stackItem objectForKey:@"fileName"];
+            uint32_t lineNumber = [[stackItem objectForKey:@"lineNumber"] intValue];
+            uint32_t columnNumber = [[stackItem objectForKey:@"columnNumber"] intValue];
+            
+            CLSStackFrame *stackFrame = [CLSStackFrame stackFrameWithSymbol:functionName];
+            stackFrame.fileName = fileName;
+            stackFrame.lineNumber = lineNumber;
+            stackFrame.offset = columnNumber;
+            
+            [stackFrames addObject:stackFrame];
         }
     }
     

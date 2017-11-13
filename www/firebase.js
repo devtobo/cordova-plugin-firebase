@@ -145,3 +145,21 @@ exports.setCrashlyticsValue = function(name, value, success, error) {
 exports.logCrashlytics = function(message, success, error) {
     exec(success, error, "FirebasePlugin", "logCrashlytics", [message]);
 };
+
+// Performance
+
+exports.sendImmediateTraceCounter = function(traceName, counterName, counterValue, success, error) {
+    exec(success, error, "FirebasePlugin", "sendImmediateTraceCounter", [traceName, counterName, counterValue]);
+};
+
+exports.startTrace = function(traceName, success, error) {
+    exec(success, error, "FirebasePlugin", "startTrace", [traceName]);
+};
+
+exports.stopTrace = function(traceName, success, error) {
+    exec(success, error, "FirebasePlugin", "stopTrace", [traceName]);
+};
+
+exports.traceIncrementCounterByValue = function(traceName, counterName, counterValue, success, error) {
+    exec(success, error, "FirebasePlugin", "traceIncrementCounterByValue", [traceName, counterName, counterValue]);
+};

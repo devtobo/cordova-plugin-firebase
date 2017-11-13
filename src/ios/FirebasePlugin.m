@@ -3,6 +3,7 @@
 #import "AppDelegate.h"
 #import "Firebase.h"
 #import <Crashlytics/Crashlytics.h>
+#import <FirebasePerformance/FirebasePerformance.h>
 #import <Fabric/Fabric.h>
 @import FirebaseInstanceID;
 @import FirebaseMessaging;
@@ -34,6 +35,7 @@ static FirebasePlugin *firebasePlugin;
 - (void)pluginInitialize {
     NSLog(@"Starting Firebase plugin");
     firebasePlugin = self;
+    _performanceTracesByName = [NSMutableDictionary dictionary];
 }
 
 // DEPRECATED - alias of getToken
@@ -424,6 +426,57 @@ CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStat
     NSString *message = [command.arguments objectAtIndex:0];
     
     CLSLog(@"%@", message);
+    
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)sendImmediateTraceCounter:(CDVInvokedUrlCommand *)command {
+    
+    NSString *traceName = [command.arguments objectAtIndex:0];
+    NSString *counterName = [command.arguments objectAtIndex:1];
+    NSInteger counterValue = [[command.arguments objectAtIndex:2] intValue];
+    
+    FIRTrace *trace = [FIRPerformance startTraceWithName:traceName];
+    [trace incrementCounterNamed:counterName by:counterValue];
+    [trace stop];
+    
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)startTrace:(CDVInvokedUrlCommand *)command {
+    
+    NSString *traceName = [command.arguments objectAtIndex:0];
+    
+    FIRTrace *trace = [FIRPerformance startTraceWithName:traceName];
+    [_performanceTracesByName setObject:trace forKey:traceName];
+    
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)stopTrace:(CDVInvokedUrlCommand *)command {
+    
+    NSString *traceName = [command.arguments objectAtIndex:0];
+    
+    FIRTrace *trace = [_performanceTracesByName objectForKey:traceName];
+    [trace stop];
+    
+    [_performanceTracesByName removeObjectForKey:traceName];
+    
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)traceIncrementCounterByValue:(CDVInvokedUrlCommand *)command {
+    
+    NSString *traceName = [command.arguments objectAtIndex:0];
+    NSString *counterName = [command.arguments objectAtIndex:1];
+    NSInteger counterValue = [[command.arguments objectAtIndex:2] intValue];
+    
+    FIRTrace *trace = [_performanceTracesByName objectForKey:traceName];
+    [trace incrementCounterNamed:counterName by:counterValue];
     
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];

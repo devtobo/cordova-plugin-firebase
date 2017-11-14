@@ -431,6 +431,9 @@ CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStat
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
+
+#pragma mark - Performance
+
 - (void)sendImmediateTraceCounter:(CDVInvokedUrlCommand *)command {
     
     NSString *traceName = [command.arguments objectAtIndex:0];
@@ -449,6 +452,13 @@ CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStat
     
     NSString *traceName = [command.arguments objectAtIndex:0];
     
+    if ([_performanceTracesByName objectForKey:trace]) {
+        // Trace already exist, report error
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_INVALID_ACTION messageAsString:@"Trace already started"];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        return;
+    }
+
     FIRTrace *trace = [FIRPerformance startTraceWithName:traceName];
     [_performanceTracesByName setObject:trace forKey:traceName];
     
@@ -477,6 +487,23 @@ CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStat
     
     FIRTrace *trace = [_performanceTracesByName objectForKey:traceName];
     [trace incrementCounterNamed:counterName by:counterValue];
+    
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)reportCacheSize:(CDVInvokedUrlCommand *)command {
+    
+    NSFileManager *fm = [NSFileManager defaultManager];
+    unsigned long long cache = ([fm calculateCacheSize]) / (1000 * 1000);
+    unsigned long long docs = ([fm calculateDocsSize]) / (1000 * 1000);
+    unsigned long long library = ([fm calculateLibrarySize]) / (1000 * 1000);
+
+    FIRTrace *trace = [FIRPerformance startTraceWithName:@"cache_size_report"];
+    [trace incrementCounterNamed:@"cache_size_mo" by:cache];
+    [trace incrementCounterNamed:@"docs_size_mo" by:docs];
+    [trace incrementCounterNamed:@"library_size_mo" by:library];
+    [trace stop];
     
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];

@@ -163,3 +163,7 @@ exports.stopTrace = function(traceName, success, error) {
 exports.traceIncrementCounterByValue = function(traceName, counterName, counterValue, success, error) {
     exec(success, error, "FirebasePlugin", "traceIncrementCounterByValue", [traceName, counterName, counterValue]);
 };
+
+exports.reportCacheSize = function(success, error) {
+    exec(success, error, "FirebasePlugin", "reportCacheSize", []);
+};

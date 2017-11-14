@@ -720,8 +720,6 @@ public class FirebasePlugin extends CordovaPlugin {
             public void run() {
                 try {
 
-                    System.out.println("sendJavascriptError test");
-
                     ArrayList<StackTraceElement> stackFrameArray = new ArrayList<StackTraceElement>();
                     int length = jsonStackFrames.length();
                     for (int i = 0 ; i < length ; i++) {
@@ -755,7 +753,6 @@ public class FirebasePlugin extends CordovaPlugin {
             public void run() {
                 try {
 
-                    System.out.println("sendUserError test");
                     Exception exception = new Exception(message, new Throwable(dictionary.toString()));
                     FirebaseCrash.report(exception);
 
@@ -771,7 +768,7 @@ public class FirebasePlugin extends CordovaPlugin {
             public void run() {
                 try {
 
-                    System.out.println("setCrashlyticsValue test");
+                    System.out.println("setCrashlyticsValue test (not implemented)");
                     FirebaseCrash.log("setCrashlyticsValue key=" + key + " value=" + value);
 
                     callbackContext.success();
@@ -786,7 +783,6 @@ public class FirebasePlugin extends CordovaPlugin {
             public void run() {
                 try {
 
-                    System.out.println("logCrashlytics test");
                     FirebaseCrash.log(message);
 
                     callbackContext.success();

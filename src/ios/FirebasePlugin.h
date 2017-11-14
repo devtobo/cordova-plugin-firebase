@@ -28,4 +28,6 @@
 @property (nonatomic, copy) NSString *tokenRefreshCallbackId;
 @property (nonatomic, retain) NSMutableArray *notificationStack;
 
+@property (nonatomic, retain) NSMutableDictionary *performanceTracesByName;
+
 @end

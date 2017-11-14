@@ -2,6 +2,7 @@
 #import <Cordova/CDV.h>
 #import "AppDelegate.h"
 #import "Firebase.h"
+#import "NSFileManager+NRFileManager.h"
 #import <Crashlytics/Crashlytics.h>
 #import <FirebasePerformance/FirebasePerformance.h>
 #import <Fabric/Fabric.h>
@@ -452,7 +453,7 @@ CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStat
     
     NSString *traceName = [command.arguments objectAtIndex:0];
     
-    if ([_performanceTracesByName objectForKey:trace]) {
+    if ([_performanceTracesByName objectForKey:traceName]) {
         // Trace already exist, report error
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_INVALID_ACTION messageAsString:@"Trace already started"];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];

@@ -13,6 +13,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.perf.FirebasePerformance;
+import com.google.firebase.perf.metrics.Trace;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigInfo;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
@@ -54,6 +56,7 @@ public class FirebasePlugin extends CordovaPlugin {
     private static ArrayList<Bundle> notificationStack = null;
     private static CallbackContext notificationCallbackContext;
     private static CallbackContext tokenRefreshCallbackContext;
+    private static HashMap<String, Trace> tracesMap = null;
 
     @Override
     protected void pluginInitialize() {
@@ -67,6 +70,9 @@ public class FirebasePlugin extends CordovaPlugin {
                 if (extras != null && extras.size() > 1) {
                     if (FirebasePlugin.notificationStack == null) {
                         FirebasePlugin.notificationStack = new ArrayList<Bundle>();
+                    }
+                    if (FirebasePlugin.tracesMap == null) {
+                        FirebasePlugin.tracesMap = new HashMap<String, Trace>();
                     }
                     if (extras.containsKey("google.message_id")) {
                         extras.putBoolean("tap", true);
@@ -168,6 +174,27 @@ public class FirebasePlugin extends CordovaPlugin {
         }
         else if (action.equals("logCrashlytics")) {
             this.logCrashlytics(callbackContext, args.getString(0));
+            return true;
+        }
+        // performance
+        else if (action.equals("startTrace")) {
+            this.startTrace(callbackContext, args.getString(0));
+            return true;
+        }
+        else if (action.equals("stopTrace")) {
+            this.stopTrace(callbackContext, args.getString(0));
+            return true;
+        }
+        else if (action.equals("traceIncrementCounterByValue")) {
+            this.traceIncrementCounterByValue(callbackContext, args.getString(0), args.getString(1), args.getInt(2));
+            return true;
+        }
+        else if (action.equals("sendImmediateTraceCounter")) {
+            this.sendImmediateTraceCounter(callbackContext, args.getString(0), args.getString(1), args.getInt(2));
+            return true;
+        }
+        else if (action.equals("reportCacheSize")) {
+            this.reportCacheSize(callbackContext);
             return true;
         }
         return false;
@@ -793,7 +820,112 @@ public class FirebasePlugin extends CordovaPlugin {
         });
     }
 
+    private void startTrace(final CallbackContext callbackContext, final String traceName) {
+        cordova.getThreadPool().execute(new Runnable() {
+            public void run() {
+            try {
+                Trace myTrace = FirebasePerformance.getInstance().newTrace(traceName);
+                myTrace.start();
+
+                FirebasePlugin.tracesMap.put(traceName, myTrace);
+
+                callbackContext.success();
+            } catch (Exception e) {
+                callbackContext.error(e.getMessage());
+            }
+            }
+        });
+    }
+
+    private void stopTrace(final CallbackContext callbackContext, final String traceName) {
+        cordova.getThreadPool().execute(new Runnable() {
+            public void run() {
+                try {
+                    Trace myTrace = FirebasePlugin.tracesMap.get(traceName);
+                    if (myTrace != null) {
+                        myTrace.stop();
+                        FirebasePlugin.tracesMap.remove(traceName);
+                    }
+
+                    callbackContext.success();
+                } catch (Exception e) {
+                    callbackContext.error(e.getMessage());
+                }
+            }
+        });
+    }
+
+    private void traceIncrementCounterByValue(final CallbackContext callbackContext, final String traceName, final String counterName, final int byValue) {
+        cordova.getThreadPool().execute(new Runnable() {
+            public void run() {
+                try {
+                    Trace myTrace = FirebasePlugin.tracesMap.get(traceName);
+                    if (myTrace != null) {
+                        myTrace.incrementCounter(counterName, byValue);
+                    }
+
+                    callbackContext.success();
+                } catch (Exception e) {
+                    callbackContext.error(e.getMessage());
+                }
+            }
+        });
+    }
+
+    private void sendImmediateTraceCounter(final CallbackContext callbackContext, final String traceName, final String counterName, final int byValue) {
+        cordova.getThreadPool().execute(new Runnable() {
+            public void run() {
+                try {
+                    Trace myTrace = FirebasePerformance.getInstance().newTrace(traceName);
+                    myTrace.start();
+                    myTrace.incrementCounter(counterName, byValue);
+                    myTrace.stop();
+
+                    callbackContext.success();
+                } catch (Exception e) {
+                    callbackContext.error(e.getMessage());
+                }
+            }
+        });
+    }
+
+    private void reportCacheSize(final CallbackContext callbackContext) {
+        cordova.getThreadPool().execute(new Runnable() {
+            public void run() {
+                try {
+                    // TODO: implement this
+
+                    int testCacheSize = 50 + (int) Math.floor(Math.random() * 101);
+
+                    Trace myTrace = FirebasePerformance.getInstance().newTrace("test_report_cache_size");
+                    myTrace.start();
+                    myTrace.incrementCounter("test_fake_cache_size", testCacheSize);
+                    myTrace.stop();
+
+
+                    callbackContext.success();
+                } catch (Exception e) {
+                    callbackContext.error(e.getMessage());
+                }
+            }
+        });
+    }
+
     /*
+
+    else if (action.equals("startTrace")) {
+        this.startTrace(callbackContext, args.getString(0));
+        return true;
+    }
+    else if (action.equals("stopTrace")) {
+        this.stopTrace(callbackContext, args.getString(0));
+        return true;
+    }
+    else if (action.equals("traceIncrementCounterByValue")) {
+        this.traceIncrementCounterByValue(callbackContext, args.getString(0), args.getString(1), args.getInt(2));
+        return true;
+    }
+
     else if (action.equals("sendJavascriptError")) {
         this.sendJavascriptError(callbackContext, args.getString(0), args.getString(1), args.getString(2));
         return true;

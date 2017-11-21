@@ -199,6 +199,9 @@ public class FirebasePlugin extends CordovaPlugin {
         } else if (action.equals("onDynamicLink")) {
             this.onDynamicLink(callbackContext);
             return true;
+        } else if (action.equals("reportCacheSize")) {
+            this.reportCacheSize(callbackContext);
+            return true;
         } else if (action.equals("sendJavascriptError")) {
             this.sendJavascriptError(callbackContext, args.getString(0), args.getString(1), args.getJSONArray(2));
             return true;
@@ -1012,6 +1015,66 @@ public class FirebasePlugin extends CordovaPlugin {
                     }
                 }
             });
+    }
+
+    private void reportCacheSize(final CallbackContext callbackContext) {
+        cordova.getThreadPool().execute(new Runnable() {
+            public void run() {
+                try {
+                    long cacheSize = getDirSize(cacheDir) / 1000000;
+
+                    Trace myTrace = FirebasePerformance.getInstance().newTrace("report_cache_size");
+                    myTrace.start();
+                    myTrace.incrementCounter("cache_size_mo", cacheSize);
+                    myTrace.stop();
+
+                    callbackContext.success();
+                } catch (Exception e) {
+                    callbackContext.error(e.getMessage());
+                }
+            }
+        });
+    }
+
+    private static boolean isValidDir(File dir){
+        if (dir != null && dir.exists() && dir.isDirectory()){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    private static boolean isSymlink(File file) throws IOException {
+        File canon;
+        if (file.getParent() == null) {
+            canon = file;
+        } else {
+            canon = new File(file.getParentFile().getCanonicalFile(),
+                    file.getName());
+        }
+        return !canon.getCanonicalFile().equals(canon.getAbsoluteFile());
+    }
+    public static long getDirSize(File dir){
+        if (!isValidDir(dir))
+            return 0L;
+        File[] files = dir.listFiles();
+        //Guard for null pointer exception on files
+        if (files == null){
+            return 0L;
+        }else{
+            long size = 0L;
+            for(File file : files){
+                if (file.isFile()){
+                    size += file.length();
+                }else{
+                    try{
+                        if (!isSymlink(file)) size += getDirSize(file);
+                    }catch (IOException ioe){
+                        //digest exception
+                    }
+                }
+            }
+            return size;
+        }
     }
 }
 

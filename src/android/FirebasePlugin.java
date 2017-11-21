@@ -28,6 +28,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -37,6 +39,8 @@ import java.util.Set;
 
 // Firebase PhoneAuth
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.FirebaseException;
@@ -58,9 +62,12 @@ public class FirebasePlugin extends CordovaPlugin {
     private static CallbackContext tokenRefreshCallbackContext;
     private static HashMap<String, Trace> tracesMap = null;
 
+    private File cacheDir;
+
     @Override
     protected void pluginInitialize() {
         final Context context = this.cordova.getActivity().getApplicationContext();
+        cacheDir = context.getCacheDir();
         final Bundle extras = this.cordova.getActivity().getIntent().getExtras();
         this.cordova.getThreadPool().execute(new Runnable() {
             public void run() {
@@ -893,15 +900,12 @@ public class FirebasePlugin extends CordovaPlugin {
         cordova.getThreadPool().execute(new Runnable() {
             public void run() {
                 try {
-                    // TODO: implement this
+                    long cacheSize = getDirSize(cacheDir) / 1000000;
 
-                    int testCacheSize = 50 + (int) Math.floor(Math.random() * 101);
-
-                    Trace myTrace = FirebasePerformance.getInstance().newTrace("test_report_cache_size");
+                    Trace myTrace = FirebasePerformance.getInstance().newTrace("report_cache_size");
                     myTrace.start();
-                    myTrace.incrementCounter("test_fake_cache_size", testCacheSize);
+                    myTrace.incrementCounter("cache_size_mo", cacheSize);
                     myTrace.stop();
-
 
                     callbackContext.success();
                 } catch (Exception e) {
@@ -909,6 +913,47 @@ public class FirebasePlugin extends CordovaPlugin {
                 }
             }
         });
+    }
+
+    private static boolean isValidDir(File dir){
+        if (dir != null && dir.exists() && dir.isDirectory()){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    private static boolean isSymlink(File file) throws IOException {
+        File canon;
+        if (file.getParent() == null) {
+            canon = file;
+        } else {
+            canon = new File(file.getParentFile().getCanonicalFile(),
+                    file.getName());
+        }
+        return !canon.getCanonicalFile().equals(canon.getAbsoluteFile());
+    }
+    public static long getDirSize(File dir){
+        if (!isValidDir(dir))
+            return 0L;
+        File[] files = dir.listFiles();
+        //Guard for null pointer exception on files
+        if (files == null){
+            return 0L;
+        }else{
+            long size = 0L;
+            for(File file : files){
+                if (file.isFile()){
+                    size += file.length();
+                }else{
+                    try{
+                        if (!isSymlink(file)) size += getDirSize(file);
+                    }catch (IOException ioe){
+                        //digest exception
+                    }
+                }
+            }
+            return size;
+        }
     }
 
     /*

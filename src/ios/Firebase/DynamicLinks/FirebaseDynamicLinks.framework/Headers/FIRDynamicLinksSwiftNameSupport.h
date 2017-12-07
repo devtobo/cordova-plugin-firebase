@@ -1,11 +1,4 @@
-/** @file FIRAuthSwiftNameSupport.h
-    @brief Firebase Auth SDK
-    @copyright Copyright 2017 Google Inc.
-    @remarks Use of this SDK is subject to the Google APIs Terms of Service:
-        https://developers.google.com/terms/
- */
-
-#ifndef FIR_SWIFT_NAME
+#ifndef FIR_SWIFT_NAME  // NOLINT
 
 #import <Foundation/Foundation.h>
 
@@ -17,4 +10,4 @@
 #define FIR_SWIFT_NAME(X)  // Intentionally blank.
 #endif  // #ifdef __IPHONE_9_3
 
-#endif  // FIR_SWIFT_NAME
+#endif  // FIR_SWIFT_NAME  // NOLINT

@@ -167,3 +167,9 @@ exports.traceIncrementCounterByValue = function(traceName, counterName, counterV
 exports.reportCacheSize = function(success, error) {
     exec(success, error, "FirebasePlugin", "reportCacheSize", []);
 };
+
+// Dynamic Links
+
+exports.onDynamicLink = function(success, error) {
+    exec(success, error, "FirebasePlugin", "onDynamicLink", []);
+}

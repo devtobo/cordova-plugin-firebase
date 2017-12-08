@@ -1,5 +1,6 @@
 #import <Cordova/CDV.h>
 #import "AppDelegate.h"
+#import <FirebaseDynamicLinks/FirebaseDynamicLinks.h>
 
 @interface FirebasePlugin : CDVPlugin
 + (FirebasePlugin *) firebasePlugin;
@@ -24,6 +25,12 @@
 - (void)fetch:(CDVInvokedUrlCommand*)command;
 - (void)activateFetched:(CDVInvokedUrlCommand*)command;
 - (void)getValue:(CDVInvokedUrlCommand*)command;
+
+@property (nonatomic, copy) NSString *dynamicLinkCallbackId;
+@property (nonatomic, retain) NSDictionary* cachedDynamicLinkData;
+- (void)onDynamicLink:(CDVInvokedUrlCommand *)command;
+- (void)postDynamicLink:(FIRDynamicLink*) dynamicLink;
+
 @property (nonatomic, copy) NSString *notificationCallbackId;
 @property (nonatomic, copy) NSString *tokenRefreshCallbackId;
 @property (nonatomic, retain) NSMutableArray *notificationStack;

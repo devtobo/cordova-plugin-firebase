@@ -20,21 +20,19 @@
 @implementation AppDelegate (FirebasePlugin)
 
 + (void)load {
-    Method original = class_getInstanceMethod(self, @selector(application:didFinishLaunchingWithOptions:));
-    Method swizzled = class_getInstanceMethod(self, @selector(application:swizzledDidFinishLaunchingWithOptions:));
-    method_exchangeImplementations(original, swizzled);
+    method_exchangeImplementations(
+        class_getInstanceMethod(self, @selector(application:didFinishLaunchingWithOptions:)),
+        class_getInstanceMethod(self, @selector(firebase_plugin_application:didFinishLaunchingWithOptions:))
+    );
+    method_exchangeImplementations(
+        class_getInstanceMethod(self, @selector(application:continueUserActivity:restorationHandler:)),
+        class_getInstanceMethod(self, @selector(firebase_plugin_application:continueUserActivity:restorationHandler:))
+    );
 }
 
-- (void)setApplicationInBackground:(NSNumber *)applicationInBackground {
-    objc_setAssociatedObject(self, kApplicationInBackgroundKey, applicationInBackground, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
 
-- (NSNumber *)applicationInBackground {
-    return objc_getAssociatedObject(self, kApplicationInBackgroundKey);
-}
-
-- (BOOL)application:(UIApplication *)application swizzledDidFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    [self application:application swizzledDidFinishLaunchingWithOptions:launchOptions];
+- (BOOL)firebase_plugin_application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    [self firebase_plugin_application:application didFinishLaunchingWithOptions:launchOptions];
     
     if(![FIRApp defaultApp]) {
         [FIRApp configure];
@@ -47,6 +45,38 @@
     
     return YES;
 }
+
+- (BOOL)firebase_plugin_application:(UIApplication *)application
+        continueUserActivity:(NSUserActivity *)userActivity
+          restorationHandler:(void (^)(NSArray *))restorationHandler {
+   FirebasePlugin* firPlugin = [self.viewController getCommandInstance:@"FirebasePlugin"];
+    
+    BOOL handled = [[FIRDynamicLinks dynamicLinks]
+                    handleUniversalLink:userActivity.webpageURL
+                    completion:^(FIRDynamicLink * _Nullable dynamicLink, NSError * _Nullable error) {
+                        NSLog(@"FIR Dynamic Link: %@", dynamicLink);
+                        if (dynamicLink) {
+                            [firPlugin postDynamicLink:dynamicLink];
+                        }
+                    }];
+    
+    if (handled) {
+        return YES;
+    }
+    
+    return [self firebase_plugin_application:application
+                 continueUserActivity:userActivity
+                   restorationHandler:restorationHandler];
+}
+
+- (void)setApplicationInBackground:(NSNumber *)applicationInBackground {
+    objc_setAssociatedObject(self, kApplicationInBackgroundKey, applicationInBackground, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (NSNumber *)applicationInBackground {
+    return objc_getAssociatedObject(self, kApplicationInBackgroundKey);
+}
+
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
     [self connectToFcm];

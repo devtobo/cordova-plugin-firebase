@@ -11,7 +11,7 @@ Thank you for your support!
 ## in this fork
 ### verifyPhoneNumber (Android only)
 
-Request a verificationId and send a SMS with a verificatioCode.
+Request a verificationId and send a SMS with a verificationCode.
 Use them to construct a credenial to sign in the user (in your app).
 https://firebase.google.com/docs/auth/android/phone-auth
 https://firebase.google.com/docs/reference/js/firebase.auth.Auth#signInWithCredential
@@ -42,11 +42,11 @@ See npm package for versions - https://www.npmjs.com/package/cordova-plugin-fire
 
 Install the plugin by adding it your project's config.xml:
 ```
-<plugin name="cordova-plugin-firebase" spec="0.1.24" />
+<plugin name="cordova-plugin-firebase" spec="0.1.25" />
 ```
 or by running:
 ```
-cordova plugin add cordova-plugin-firebase@0.1.24 --save
+cordova plugin add cordova-plugin-firebase@0.1.25 --save
 ```
 Download your Firebase configuration files, GoogleService-Info.plist for ios and google-services.json for android, and place them in the root folder of your cordova project:
 
@@ -274,9 +274,17 @@ window.FirebasePlugin.setUserProperty("name", "value");
 
 Fetch Remote Config parameter values for your app:
 ```
-window.FirebasePlugin.fetch();
+window.FirebasePlugin.fetch(function () {
+    // success callback
+}, function () {
+    // error callback
+});
 // or, specify the cacheExpirationSeconds
-window.FirebasePlugin.fetch(600);
+window.FirebasePlugin.fetch(600, function () {
+    // success callback
+}, function () {
+    // error callback
+});
 ```
 
 ### activateFetched
@@ -384,7 +392,7 @@ window.FirebasePlugin.setDefaults(defaults, "namespace");
 ### Phone Authentication
 **BASED ON THE CONTRIBUTIONS OF**
 IOS 
-https://github.com/silverio/cordova-plugin-
+https://github.com/silverio/cordova-plugin-firebase
 
 ANDROID 
 https://github.com/apptum/cordova-plugin-firebase

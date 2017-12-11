@@ -72,12 +72,12 @@ xmlns:android="http://schemas.android.com/apk/res/android">
 
         <framework src="src/android/build.gradle" custom="true" type="gradleReference" />
         <framework src="com.google.gms:google-services:3.1.2" />
-        <framework src="com.google.android.gms:play-services-tagmanager:$GMS_VERSION" />
-        <framework src="com.google.firebase:firebase-core:$FIREBASE_VERSION" />
-        <framework src="com.google.firebase:firebase-messaging:$FIREBASE_VERSION" />
-        <framework src="com.google.firebase:firebase-crash:$FIREBASE_VERSION" />
-        <framework src="com.google.firebase:firebase-config:$FIREBASE_VERSION" />
-        <framework src="com.google.firebase:firebase-dynamic-links:$FIREBASE_VERSION" />
+        <framework src="com.google.android.gms:play-services-tagmanager:11.6.0" />
+        <framework src="com.google.firebase:firebase-core:11.6.0" />
+        <framework src="com.google.firebase:firebase-messaging:11.6.0" />
+        <framework src="com.google.firebase:firebase-crash:11.6.0" />
+        <framework src="com.google.firebase:firebase-config:11.6.0" />
+        <framework src="com.google.firebase:firebase-dynamic-links:11.6.0" />
     </platform>
 
     <platform name="ios">

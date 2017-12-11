@@ -3,14 +3,18 @@ package org.apache.cordova.firebase;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Base64;
 import android.util.Log;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
+import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.perf.FirebasePerformance;
@@ -50,6 +54,7 @@ import com.google.firebase.FirebaseTooManyRequestsException;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
 
+
 public class FirebasePlugin extends CordovaPlugin {
 
     private FirebaseAnalytics mFirebaseAnalytics;
@@ -60,6 +65,7 @@ public class FirebasePlugin extends CordovaPlugin {
     private static ArrayList<Bundle> notificationStack = null;
     private static CallbackContext notificationCallbackContext;
     private static CallbackContext tokenRefreshCallbackContext;
+    private static CallbackContext dynamicLinkCallback;
     private static HashMap<String, Trace> tracesMap = null;
 
     private File cacheDir;
@@ -166,6 +172,10 @@ public class FirebasePlugin extends CordovaPlugin {
             this.verifyPhoneNumber(callbackContext, args.getString(0), args.getInt(1));
             return true;
         }
+        else if (action.equals("onDynamicLink")) {
+            this.onDynamicLink(callbackContext);
+            return true;
+        }
         // crashlytics
         else if (action.equals("sendJavascriptError")) {
             this.sendJavascriptError(callbackContext, args.getString(0), args.getString(1), args.getJSONArray(2));
@@ -207,6 +217,7 @@ public class FirebasePlugin extends CordovaPlugin {
         return false;
     }
 
+
     @Override
     public void onPause(boolean multitasking) {
         FirebasePlugin.inBackground = true;
@@ -221,6 +232,7 @@ public class FirebasePlugin extends CordovaPlugin {
     public void onReset() {
         FirebasePlugin.notificationCallbackContext = null;
         FirebasePlugin.tokenRefreshCallbackContext = null;
+        FirebasePlugin.dynamicLinkCallback = null;
     }
 
     private void onNotificationOpen(final CallbackContext callbackContext) {
@@ -302,9 +314,13 @@ public class FirebasePlugin extends CordovaPlugin {
     public void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         final Bundle data = intent.getExtras();
+
         if (data != null && data.containsKey("google.message_id")) {
             data.putBoolean("tap", true);
             FirebasePlugin.sendNotification(data);
+        }
+        else if (FirebasePlugin.dynamicLinkCallback != null) {
+            respondWithDynamicLink(intent);
         }
     }
 
@@ -954,6 +970,42 @@ public class FirebasePlugin extends CordovaPlugin {
             }
             return size;
         }
+    }
+
+
+    private void onDynamicLink(final CallbackContext callbackContext) {
+        cordova.getThreadPool().execute(new Runnable() {
+            public void run() {
+                FirebasePlugin.dynamicLinkCallback = callbackContext;
+                respondWithDynamicLink(cordova.getActivity().getIntent());
+            }
+        });
+    }
+
+    private void respondWithDynamicLink(Intent intent) {
+        FirebaseDynamicLinks.getInstance().getDynamicLink(intent)
+            .addOnSuccessListener(cordova.getActivity(), new OnSuccessListener<PendingDynamicLinkData>() {
+                @Override
+                public void onSuccess(PendingDynamicLinkData pendingDynamicLinkData) {
+                    if (pendingDynamicLinkData != null) {
+                        Uri deepLink = pendingDynamicLinkData.getLink();
+
+                        if (deepLink != null) {
+                            JSONObject response = new JSONObject();
+                            try {
+                                response.put("deepLink", deepLink);
+                                response.put("clickTimestamp", pendingDynamicLinkData.getClickTimestamp());
+
+                                PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, response);
+                                pluginResult.setKeepCallback(true);
+                                dynamicLinkCallback.sendPluginResult(pluginResult);
+                            } catch (JSONException e) {
+                                Log.e(TAG, "Fail to handle dynamic link data", e);
+                            }
+                        }
+                    }
+                }
+            });
     }
 
     /*

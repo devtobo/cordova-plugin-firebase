@@ -103,6 +103,12 @@ xmlns:android="http://schemas.android.com/apk/res/android">
             </array>
         </config-file>
 
+        <config-file target="*/Entitlements-Release.plist" parent="com.apple.developer.associated-domains">
+            <array>
+                <string>applinks:$APP_DOMAIN</string>
+            </array>
+        </config-file>
+
         <config-file target="*-Info.plist" parent="CFBundleURLTypes">
             <array>
                 <dict>

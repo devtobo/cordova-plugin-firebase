@@ -17,6 +17,14 @@
 
 #define kApplicationInBackgroundKey @"applicationInBackground"
 
+// --- Begin Batch Firebase cold start workaround ---
+@interface BAPushCenter : NSObject
++ (BAPushCenter*)instance;
+@property NSDictionary* startPushUserInfo;
+@end
+// --- End Batch Firebase cold start workaround ---
+
+
 @implementation AppDelegate (FirebasePlugin)
 
 + (void)load {
@@ -136,6 +144,12 @@
     NSLog(@"%@", mutableUserInfo);
     
     [FirebasePlugin.firebasePlugin sendNotification:mutableUserInfo];
+        
+    // --- Begin Batch Firebase cold start workaround ---
+    if ([BAPushCenter class]) {
+        [BAPushCenter instance].startPushUserInfo = userInfo;
+    }
+    // --- End Batch Firebase cold start workaround ---
 }
 
 #if defined(__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
@@ -150,6 +164,7 @@
     NSLog(@"%@", mutableUserInfo);
     
     [FirebasePlugin.firebasePlugin sendNotification:mutableUserInfo];
+    [BatchPush handleUserNotificationCenter:center willPresentNotification:notification willShowSystemForegroundAlert:NO];
 }
 
 // Receive data message on iOS 10 devices.

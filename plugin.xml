@@ -8,14 +8,15 @@ xmlns:android="http://schemas.android.com/apk/res/android">
 
     <engines>
         <engine name="cordova" version=">=3.2.0" />
+        <engine name="cordova-android" version=">=7.0.0" />
     </engines>
 
     <preference name="APP_DOMAIN" />
     <preference name="APP_PATH" default ="/" />
 
     <platform name="android">
-        <preference name="GMS_VERSION" default="11.6.0"/>
-        <preference name="FIREBASE_VERSION" default="11.6.0"/>
+        <preference name="GMS_VERSION" default="11.8.0"/>
+        <preference name="FIREBASE_VERSION" default="11.8.0"/>
 
         <js-module name="FirebasePlugin" src="www/firebase.js">
             <clobbers target="FirebasePlugin" />
@@ -25,12 +26,6 @@ xmlns:android="http://schemas.android.com/apk/res/android">
                 <param name="android-package" value="org.apache.cordova.firebase.FirebasePlugin" />
                 <param name="onload" value="true" />
             </feature>
-        </config-file>
-        <config-file parent="/resources" target="res/values/strings.xml">
-            <string name="google_app_id">@string/google_app_id</string>
-        </config-file>
-        <config-file parent="/resources" target="res/values/strings.xml">
-            <string name="google_api_key">@string/google_api_key</string>
         </config-file>
         <config-file target="AndroidManifest.xml" parent="/*">
                 <uses-permission android:name="android.permission.INTERNET" />
@@ -63,7 +58,7 @@ xmlns:android="http://schemas.android.com/apk/res/android">
             </intent-filter>
         </config-file>
 
-        <source-file src="src/android/google-services.json" target-dir="." />
+        <source-file src="src/android/google-services.json" target-dir="app/" />
         <source-file src="src/android/FirebasePlugin.java" target-dir="src/org/apache/cordova/firebase" />
         <source-file src="src/android/OnNotificationOpenReceiver.java" target-dir="src/org/apache/cordova/firebase" />
         <source-file src="src/android/FirebasePluginInstanceIDService.java" target-dir="src/org/apache/cordova/firebase" />
@@ -71,13 +66,15 @@ xmlns:android="http://schemas.android.com/apk/res/android">
         <source-file src="src/android/colors.xml" target-dir="res/values" />
 
         <framework src="src/android/build.gradle" custom="true" type="gradleReference" />
-        <framework src="com.google.gms:google-services:3.1.2" />
-        <framework src="com.google.android.gms:play-services-tagmanager:11.6.0" />
-        <framework src="com.google.firebase:firebase-core:11.6.0" />
-        <framework src="com.google.firebase:firebase-messaging:11.6.0" />
-        <framework src="com.google.firebase:firebase-crash:11.6.0" />
-        <framework src="com.google.firebase:firebase-config:11.6.0" />
-        <framework src="com.google.firebase:firebase-dynamic-links:11.6.0" />
+        <framework src="com.google.gms:google-services:3.2.0" />
+        <framework src="com.google.android.gms:play-services-tagmanager:$GMS_VERSION" />
+        <framework src="com.google.firebase:firebase-auth:$FIREBASE_VERSION" />
+        <framework src="com.google.firebase:firebase-config:$FIREBASE_VERSION" />
+        <framework src="com.google.firebase:firebase-core:$FIREBASE_VERSION" />
+        <framework src="com.google.firebase:firebase-crash:$FIREBASE_VERSION" />
+        <framework src="com.google.firebase:firebase-dynamic-links:$FIREBASE_VERSION" />
+        <framework src="com.google.firebase:firebase-messaging:$FIREBASE_VERSION" />
+        <framework src="com.google.firebase:firebase-perf:$FIREBASE_VERSION" />
     </platform>
 
     <platform name="ios">

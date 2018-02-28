@@ -71,7 +71,6 @@ xmlns:android="http://schemas.android.com/apk/res/android">
         <framework src="com.google.firebase:firebase-auth:$FIREBASE_VERSION" />
         <framework src="com.google.firebase:firebase-config:$FIREBASE_VERSION" />
         <framework src="com.google.firebase:firebase-core:$FIREBASE_VERSION" />
-        <framework src="com.google.firebase:firebase-crash:$FIREBASE_VERSION" />
         <framework src="com.google.firebase:firebase-dynamic-links:$FIREBASE_VERSION" />
         <framework src="com.google.firebase:firebase-messaging:$FIREBASE_VERSION" />
         <framework src="com.google.firebase:firebase-perf:$FIREBASE_VERSION" />

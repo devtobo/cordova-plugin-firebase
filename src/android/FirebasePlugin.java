@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Base64;
 import android.util.Log;
+
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -22,7 +24,6 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigInfo;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigValue;
-import com.google.firebase.crash.FirebaseCrash;
 import me.leolin.shortcutbadger.ShortcutBadger;
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
@@ -472,10 +473,9 @@ public class FirebasePlugin extends CordovaPlugin {
         cordova.getThreadPool().execute(new Runnable() {
             public void run() {
                 try {
-                    FirebaseCrash.report(new Exception(message));
+                    Crashlytics.logException(new Exception(message));
                     callbackContext.success(1);
                 } catch (Exception e) {
-                    FirebaseCrash.log(e.getMessage());
                     e.printStackTrace();
                     callbackContext.error(e.getMessage());
                 }
@@ -788,7 +788,8 @@ public class FirebasePlugin extends CordovaPlugin {
                     StackTraceElement[] stackFrames = stackFrameArray.toArray(new StackTraceElement[stackFrameArray.size()]);
 
                     Exception exception = new JSException(message, null, stackFrames);
-                    FirebaseCrash.report(exception);
+
+                    Crashlytics.logException(exception);
 
                     callbackContext.success();
                 } catch (Exception e) {
@@ -803,7 +804,8 @@ public class FirebasePlugin extends CordovaPlugin {
                 try {
 
                     Exception exception = new Exception(message, new Throwable(dictionary.toString()));
-                    FirebaseCrash.report(exception);
+
+                    Crashlytics.logException(exception);
 
                     callbackContext.success();
                 } catch (Exception e) {
@@ -817,8 +819,7 @@ public class FirebasePlugin extends CordovaPlugin {
             public void run() {
                 try {
 
-                    System.out.println("setCrashlyticsValue test (not implemented)");
-                    FirebaseCrash.log("setCrashlyticsValue key=" + key + " value=" + value);
+                    Crashlytics.setString(key, value);
 
                     callbackContext.success();
                 } catch (Exception e) {
@@ -832,7 +833,7 @@ public class FirebasePlugin extends CordovaPlugin {
             public void run() {
                 try {
 
-                    FirebaseCrash.log(message);
+                    Crashlytics.log(message);
 
                     callbackContext.success();
                 } catch (Exception e) {

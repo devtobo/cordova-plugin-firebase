@@ -348,8 +348,6 @@ static FirebasePlugin *firebasePlugin;
     }];
 }
 
-<<<<<<< HEAD
-
 #pragma mark - Crashlytics
 
 - (void)sendJavascriptError:(CDVInvokedUrlCommand *)command {
@@ -381,7 +379,6 @@ static FirebasePlugin *firebasePlugin;
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
-
 - (void)sendUserError:(CDVInvokedUrlCommand *)command {
     NSString *message = [command.arguments objectAtIndex:1];
     NSDictionary *userInfo = [command.arguments objectAtIndex:1];
@@ -392,7 +389,6 @@ static FirebasePlugin *firebasePlugin;
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
-
 
 - (void)setCrashlyticsValue:(CDVInvokedUrlCommand *)command {
     NSString *key = [command.arguments objectAtIndex:0];
@@ -419,7 +415,6 @@ static FirebasePlugin *firebasePlugin;
 #pragma mark - Performance
 
 - (void)sendImmediateTraceCounter:(CDVInvokedUrlCommand *)command {
-    
     NSString *traceName = [command.arguments objectAtIndex:0];
     NSString *counterName = [command.arguments objectAtIndex:1];
     NSInteger counterValue = [[command.arguments objectAtIndex:2] intValue];
@@ -433,101 +428,6 @@ static FirebasePlugin *firebasePlugin;
 }
 
 - (void)startTrace:(CDVInvokedUrlCommand *)command {
-    
-    NSString *traceName = [command.arguments objectAtIndex:0];
-    
-    if ([_performanceTracesByName objectForKey:traceName]) {
-        // Trace already exist, report error
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_INVALID_ACTION messageAsString:@"Trace already started"];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        return;
-    }
-
-    FIRTrace *trace = [FIRPerformance startTraceWithName:traceName];
-    [_performanceTracesByName setObject:trace forKey:traceName];
-    
-    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-}
-
-- (void)stopTrace:(CDVInvokedUrlCommand *)command {
-    
-    NSString *traceName = [command.arguments objectAtIndex:0];
-    
-    FIRTrace *trace = [_performanceTracesByName objectForKey:traceName];
-    [trace stop];
-    
-    [_performanceTracesByName removeObjectForKey:traceName];
-    
-    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-}
-
-- (void)traceIncrementCounterByValue:(CDVInvokedUrlCommand *)command {
-    
-    NSString *traceName = [command.arguments objectAtIndex:0];
-    NSString *counterName = [command.arguments objectAtIndex:1];
-    NSInteger counterValue = [[command.arguments objectAtIndex:2] intValue];
-    
-    FIRTrace *trace = [_performanceTracesByName objectForKey:traceName];
-    [trace incrementCounterNamed:counterName by:counterValue];
-    
-    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-}
-
-- (void)reportCacheSize:(CDVInvokedUrlCommand *)command {
-    
-    NSFileManager *fm = [NSFileManager defaultManager];
-    unsigned long long cache = ([fm calculateCacheSize]) / (1000 * 1000);
-    unsigned long long docs = ([fm calculateDocsSize]) / (1000 * 1000);
-    unsigned long long library = ([fm calculateLibrarySize]) / (1000 * 1000);
-
-    FIRTrace *trace = [FIRPerformance startTraceWithName:@"cache_size_report"];
-    [trace incrementCounterNamed:@"cache_size_mo" by:cache];
-    [trace incrementCounterNamed:@"docs_size_mo" by:docs];
-    [trace incrementCounterNamed:@"library_size_mo" by:library];
-    [trace stop];
-    
-    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-}
-
-#pragma mark - Dynamic Links
-
-- (void)onDynamicLink:(CDVInvokedUrlCommand *)command {
-    self.dynamicLinkCallbackId = command.callbackId;
-
-    if (self.cachedDynamicLinkData) {
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:self.cachedDynamicLinkData];
-        [pluginResult setKeepCallbackAsBool:YES];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.dynamicLinkCallbackId];
-
-        self.cachedDynamicLinkData = nil;
-    }
-}
-
-- (void)postDynamicLink:(FIRDynamicLink*) dynamicLink {
-    NSMutableDictionary *data = [NSMutableDictionary dictionary];
-    NSString* absoluteUrl = dynamicLink.url.absoluteString;
-    BOOL weakConfidence = (dynamicLink.matchConfidence == FIRDynamicLinkMatchConfidenceWeak);
-
-    [data setObject:(absoluteUrl ? absoluteUrl : @"") forKey:@"deepLink"];
-    [data setObject:(weakConfidence ? @"Weak" : @"Strong") forKey:@"matchType"];
-
-    if (self.dynamicLinkCallbackId) {
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:data];
-        [pluginResult setKeepCallbackAsBool:YES];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.dynamicLinkCallbackId];
-    } else {
-        self.cachedDynamicLinkData = data;
-    }
-=======
-//
-// Performace
-//
-- (void)startTrace:(CDVInvokedUrlCommand *)command {
-
     [self.commandDelegate runInBackground:^{
         NSString* traceName = [command.arguments objectAtIndex:0];
         FIRTrace *trace = [self.traces objectForKey:traceName];
@@ -584,7 +484,37 @@ static FirebasePlugin *firebasePlugin;
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 
     }];
->>>>>>> 632786356c5c0ae9c23e9749fa0687cd79ce70e5
+}
+
+#pragma mark - Dynamic Links
+
+- (void)onDynamicLink:(CDVInvokedUrlCommand *)command {
+    self.dynamicLinkCallbackId = command.callbackId;
+
+    if (self.cachedDynamicLinkData) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:self.cachedDynamicLinkData];
+        [pluginResult setKeepCallbackAsBool:YES];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.dynamicLinkCallbackId];
+
+        self.cachedDynamicLinkData = nil;
+    }
+}
+
+- (void)postDynamicLink:(FIRDynamicLink*) dynamicLink {
+    NSMutableDictionary *data = [NSMutableDictionary dictionary];
+    NSString* absoluteUrl = dynamicLink.url.absoluteString;
+    BOOL weakConfidence = (dynamicLink.matchConfidence == FIRDynamicLinkMatchConfidenceWeak);
+
+    [data setObject:(absoluteUrl ? absoluteUrl : @"") forKey:@"deepLink"];
+    [data setObject:(weakConfidence ? @"Weak" : @"Strong") forKey:@"matchType"];
+
+    if (self.dynamicLinkCallbackId) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:data];
+        [pluginResult setKeepCallbackAsBool:YES];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.dynamicLinkCallbackId];
+    } else {
+        self.cachedDynamicLinkData = data;
+    }
 }
 
 @end

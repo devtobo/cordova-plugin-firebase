@@ -42,12 +42,10 @@
     );
 }
 
-<<<<<<< HEAD
 
 - (BOOL)firebase_plugin_application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     [self firebase_plugin_application:application didFinishLaunchingWithOptions:launchOptions];
     
-=======
 - (void)setDelegate:(id)delegate {
     objc_setAssociatedObject(self, kDelegateKey, delegate, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
@@ -67,7 +65,6 @@
 - (BOOL)application:(UIApplication *)application swizzledDidFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     [self application:application swizzledDidFinishLaunchingWithOptions:launchOptions];
 
->>>>>>> 632786356c5c0ae9c23e9749fa0687cd79ce70e5
     if(![FIRApp defaultApp]) {
         [FIRApp configure];
     }
@@ -220,12 +217,9 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
     }
 
     [FirebasePlugin.firebasePlugin sendNotification:mutableUserInfo];
-<<<<<<< HEAD
     [BatchPush handleUserNotificationCenter:center willPresentNotification:notification willShowSystemForegroundAlert:NO];
-=======
 
     completionHandler();
->>>>>>> 632786356c5c0ae9c23e9749fa0687cd79ce70e5
 }
 
 // Receive data message on iOS 10 devices.

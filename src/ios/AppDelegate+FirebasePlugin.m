@@ -2,7 +2,12 @@
 #import "FirebasePlugin.h"
 #import "Firebase.h"
 #import <objc/runtime.h>
+
+#define HAVE_BATCH 0
+
+#if HAVE_BATCH
 #import <BatchBridge/Batch.h>
+#endif
 
 #if defined(__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
 @import UserNotifications;
@@ -19,12 +24,14 @@
 #define kApplicationInBackgroundKey @"applicationInBackground"
 #define kDelegateKey @"delegate"
 
+#if HAVE_BATCH
 // --- Begin Batch Firebase cold start workaround ---
 @interface BAPushCenter : NSObject
 + (BAPushCenter*)instance;
 @property NSDictionary* startPushUserInfo;
 @end
 // --- End Batch Firebase cold start workaround ---
+#endif
 
 
 @implementation AppDelegate (FirebasePlugin)
@@ -36,16 +43,15 @@
         class_getInstanceMethod(self, @selector(application:didFinishLaunchingWithOptions:)),
         class_getInstanceMethod(self, @selector(firebase_plugin_application:didFinishLaunchingWithOptions:))
     );
+    
+#if HAVE_BATCH
     method_exchangeImplementations(
         class_getInstanceMethod(self, @selector(application:continueUserActivity:restorationHandler:)),
         class_getInstanceMethod(self, @selector(firebase_plugin_application:continueUserActivity:restorationHandler:))
     );
+#endif
 }
 
-
-- (BOOL)firebase_plugin_application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    [self firebase_plugin_application:application didFinishLaunchingWithOptions:launchOptions];
-    
 - (void)setDelegate:(id)delegate {
     objc_setAssociatedObject(self, kDelegateKey, delegate, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
@@ -62,8 +68,8 @@
     return objc_getAssociatedObject(self, kApplicationInBackgroundKey);
 }
 
-- (BOOL)application:(UIApplication *)application swizzledDidFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    [self application:application swizzledDidFinishLaunchingWithOptions:launchOptions];
+- (BOOL)firebase_plugin_application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    [self firebase_plugin_application:application didFinishLaunchingWithOptions:launchOptions];
 
     if(![FIRApp defaultApp]) {
         [FIRApp configure];
@@ -105,15 +111,6 @@
                  continueUserActivity:userActivity
                    restorationHandler:restorationHandler];
 }
-
-- (void)setApplicationInBackground:(NSNumber *)applicationInBackground {
-    objc_setAssociatedObject(self, kApplicationInBackgroundKey, applicationInBackground, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-
-- (NSNumber *)applicationInBackground {
-    return objc_getAssociatedObject(self, kApplicationInBackgroundKey);
-}
-
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
     [self connectToFcm];
@@ -174,11 +171,13 @@
 
     [FirebasePlugin.firebasePlugin sendNotification:mutableUserInfo];
         
+#if HAVE_BATCH
     // --- Begin Batch Firebase cold start workaround ---
     if ([BAPushCenter class]) {
         [BAPushCenter instance].startPushUserInfo = userInfo;
     }
     // --- End Batch Firebase cold start workaround ---
+#endif
 }
 
 #if defined(__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
@@ -217,7 +216,10 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
     }
 
     [FirebasePlugin.firebasePlugin sendNotification:mutableUserInfo];
+             
+#if HAVE_BATCH
     [BatchPush handleUserNotificationCenter:center willPresentNotification:notification willShowSystemForegroundAlert:NO];
+#endif
 
     completionHandler();
 }

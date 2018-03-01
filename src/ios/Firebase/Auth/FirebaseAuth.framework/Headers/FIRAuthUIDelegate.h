@@ -17,21 +17,12 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-<<<<<<< HEAD
-=======
-#import "FIRAuthSwiftNameSupport.h"
-
->>>>>>> 632786356c5c0ae9c23e9749fa0687cd79ce70e5
 NS_ASSUME_NONNULL_BEGIN
 
 /** @protocol FIRAuthUIDelegate
     @brief A protocol to handle user interface interactions for Firebase Auth.
  */
-<<<<<<< HEAD
 NS_SWIFT_NAME(AuthUIDelegate)
-=======
-FIR_SWIFT_NAME(AuthUIDelegate)
->>>>>>> 632786356c5c0ae9c23e9749fa0687cd79ce70e5
 @protocol FIRAuthUIDelegate <NSObject>
 
 /** @fn presentViewController:animated:completion:
@@ -54,11 +45,7 @@ FIR_SWIFT_NAME(AuthUIDelegate)
         value and takes no parameters.
 */
 - (void)dismissViewControllerAnimated:(BOOL)flag completion:(void (^ _Nullable)(void))completion
-<<<<<<< HEAD
     NS_SWIFT_NAME(dismiss(animated:completion:));
-=======
-    FIR_SWIFT_NAME(dismiss(animated:completion:));
->>>>>>> 632786356c5c0ae9c23e9749fa0687cd79ce70e5
 
 @end
 

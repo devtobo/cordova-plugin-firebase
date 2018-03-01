@@ -245,22 +245,14 @@ NS_SWIFT_NAME(MessagingDelegate)
 /// * Subscribing to any topics.
 - (void)messaging:(nonnull FIRMessaging *)messaging
     didReceiveRegistrationToken:(nonnull NSString *)fcmToken
-<<<<<<< HEAD
     NS_SWIFT_NAME(messaging(_:didReceiveRegistrationToken:));
-=======
-    FIR_SWIFT_NAME(messaging(_:didReceiveRegistrationToken:));
->>>>>>> 632786356c5c0ae9c23e9749fa0687cd79ce70e5
 
 /// This method will be called whenever FCM receives a new, default FCM token for your
 /// Firebase project's Sender ID. This method is deprecated. Please use
 /// `messaging:didReceiveRegistrationToken:`.
 - (void)messaging:(nonnull FIRMessaging *)messaging
     didRefreshRegistrationToken:(nonnull NSString *)fcmToken
-<<<<<<< HEAD
     NS_SWIFT_NAME(messaging(_:didRefreshRegistrationToken:))
-=======
-    FIR_SWIFT_NAME(messaging(_:didRefreshRegistrationToken:))
->>>>>>> 632786356c5c0ae9c23e9749fa0687cd79ce70e5
     __deprecated_msg("Please use messaging:didReceiveRegistrationToken:, which is called for both \
                      current and refreshed tokens.");
 
@@ -296,7 +288,6 @@ NS_SWIFT_NAME(Messaging)
  * running iOS 10 or above.
  */
 @property(nonatomic, weak, nullable) id<FIRMessagingDelegate> delegate;
-
 
 /**
  * Delegate to handle remote data messages received via FCM for devices running iOS 10 or above.
@@ -360,6 +351,20 @@ NS_SWIFT_NAME(Messaging)
 - (void)setAPNSToken:(nonnull NSData *)apnsToken type:(FIRMessagingAPNSTokenType)type;
 
 #pragma mark - FCM Tokens
+
+/**
+ * Is Firebase Messaging token auto generation enabled?  If this flag is disabled,
+ * Firebase Messaging will not generate token automatically for message delivery.
+ *
+ * This setting is persisted, and is applied on future
+ * invocations of your application.  Once explicitly set, it overrides any
+ * settings in your Info.plist.
+ *
+ * By default, FCM automatic initialization is enabled.  If you need to change the
+ * default (for example, because you want to prompt the user before getting token)
+ * set FirebaseMessagingAutoInitEnabled to false in your application's Info.plist.
+ */
+@property(nonatomic, assign, getter=isAutoInitEnabled) BOOL autoInitEnabled;
 
 /**
  *  The FCM token is used to identify this device so that FCM can send notifications to it.

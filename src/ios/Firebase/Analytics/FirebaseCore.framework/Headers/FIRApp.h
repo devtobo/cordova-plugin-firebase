@@ -15,14 +15,6 @@
  */
 
 #import <Foundation/Foundation.h>
-<<<<<<< HEAD
-=======
-
-#if TARGET_OS_IOS
-// TODO: Remove UIKit import on next breaking change release
-#import <UIKit/UIKit.h>
-#endif
->>>>>>> 632786356c5c0ae9c23e9749fa0687cd79ce70e5
 
 #if TARGET_OS_IOS
 // TODO: Remove UIKit import on next breaking change release
@@ -83,11 +75,7 @@ NS_SWIFT_NAME(FirebaseApp)
  */
 // clang-format off
 + (void)configureWithName:(NSString *)name
-<<<<<<< HEAD
                   options:(FIROptions *)options NS_SWIFT_NAME(configure(name:options:));
-=======
-                  options:(FIROptions *)options FIR_SWIFT_NAME(configure(name:options:));
->>>>>>> 632786356c5c0ae9c23e9749fa0687cd79ce70e5
 // clang-format on
 
 /**
@@ -112,11 +100,7 @@ NS_SWIFT_NAME(FirebaseApp)
  * Returns the set of all extant FIRApp instances, or nil if there are no FIRApp instances. This
  * method is thread safe.
  */
-<<<<<<< HEAD
 + (nullable NSDictionary<NSString *, FIRApp *> *)allApps NS_SWIFT_NAME(allApps());
-=======
-+ (nullable NSDictionary<NSString *, FIRApp *> *)allApps FIR_SWIFT_NAME(allApps());
->>>>>>> 632786356c5c0ae9c23e9749fa0687cd79ce70e5
 #endif  // defined(__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
 
 /**

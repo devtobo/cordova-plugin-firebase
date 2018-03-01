@@ -21,11 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * This class provides constant fields of Google APIs.
  */
-<<<<<<< HEAD
 NS_SWIFT_NAME(FirebaseOptions)
-=======
-FIR_SWIFT_NAME(FirebaseOptions)
->>>>>>> 632786356c5c0ae9c23e9749fa0687cd79ce70e5
 @interface FIROptions : NSObject <NSCopying>
 
 /**
@@ -129,11 +125,7 @@ FIR_SWIFT_NAME(FirebaseOptions)
 // clang-format off
 - (instancetype)initWithGoogleAppID:(NSString *)googleAppID
                         GCMSenderID:(NSString *)GCMSenderID
-<<<<<<< HEAD
     NS_SWIFT_NAME(init(googleAppID:gcmSenderID:));
-=======
-    FIR_SWIFT_NAME(init(googleAppID:gcmSenderID:));
->>>>>>> 632786356c5c0ae9c23e9749fa0687cd79ce70e5
 // clang-format on
 
 @end

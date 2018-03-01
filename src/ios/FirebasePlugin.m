@@ -2,7 +2,6 @@
 #import <Cordova/CDV.h>
 #import "AppDelegate.h"
 #import "Firebase.h"
-#import "NSFileManager+NRFileManager.h"
 #import <Crashlytics/Crashlytics.h>
 #import <FirebasePerformance/FirebasePerformance.h>
 #import <Fabric/Fabric.h>
@@ -37,7 +36,6 @@ static FirebasePlugin *firebasePlugin;
 - (void)pluginInitialize {
     NSLog(@"Starting Firebase plugin");
     firebasePlugin = self;
-    _performanceTracesByName = [NSMutableDictionary dictionary];
 }
 
 - (void)getId:(CDVInvokedUrlCommand *)command {
@@ -414,18 +412,6 @@ static FirebasePlugin *firebasePlugin;
 
 #pragma mark - Performance
 
-- (void)sendImmediateTraceCounter:(CDVInvokedUrlCommand *)command {
-    NSString *traceName = [command.arguments objectAtIndex:0];
-    NSString *counterName = [command.arguments objectAtIndex:1];
-    NSInteger counterValue = [[command.arguments objectAtIndex:2] intValue];
-    
-    FIRTrace *trace = [FIRPerformance startTraceWithName:traceName];
-    [trace incrementCounterNamed:counterName by:counterValue];
-    [trace stop];
-    
-    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-}
 
 - (void)startTrace:(CDVInvokedUrlCommand *)command {
     [self.commandDelegate runInBackground:^{
@@ -467,6 +453,26 @@ static FirebasePlugin *firebasePlugin;
     }];
 }
 
+- (void)incrementCounterByValue:(CDVInvokedUrlCommand *)command {
+    [self.commandDelegate runInBackground:^{
+        NSString* traceName = [command.arguments objectAtIndex:0];
+        NSString* counterNamed = [command.arguments objectAtIndex:1];
+        NSInteger value = [[command.arguments objectAtIndex:2] intValue];
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        FIRTrace *trace = (FIRTrace*)[self.traces objectForKey:traceName];
+        
+        if (trace != nil){
+            [trace incrementCounterNamed:counterNamed by:value];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        }else{
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Trace not found"];
+        }
+        
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        
+    }];
+}
+
 - (void)stopTrace:(CDVInvokedUrlCommand *)command {
     [self.commandDelegate runInBackground:^{
         NSString* traceName = [command.arguments objectAtIndex:0];
@@ -485,6 +491,20 @@ static FirebasePlugin *firebasePlugin;
 
     }];
 }
+
+- (void)sendImmediateTraceCounter:(CDVInvokedUrlCommand *)command {
+    NSString *traceName = [command.arguments objectAtIndex:0];
+    NSString *counterName = [command.arguments objectAtIndex:1];
+    NSInteger counterValue = [[command.arguments objectAtIndex:2] intValue];
+    
+    FIRTrace *trace = [FIRPerformance startTraceWithName:traceName];
+    [trace incrementCounterNamed:counterName by:counterValue];
+    [trace stop];
+    
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
 
 #pragma mark - Dynamic Links
 

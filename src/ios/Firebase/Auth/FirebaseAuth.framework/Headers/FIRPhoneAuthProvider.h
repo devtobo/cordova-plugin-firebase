@@ -16,6 +16,11 @@
 
 #import <Foundation/Foundation.h>
 
+<<<<<<< HEAD
+=======
+#import "FIRAuthSwiftNameSupport.h"
+
+>>>>>>> 632786356c5c0ae9c23e9749fa0687cd79ce70e5
 @class FIRAuth;
 @class FIRPhoneAuthCredential;
 @protocol FIRAuthUIDelegate;

@@ -6,6 +6,10 @@
 #import "FIRAuthCredential.h"
 #import "FIRAuthDataResult.h"
 #import "FIRAuthErrors.h"
+<<<<<<< HEAD
+=======
+#import "FIRAuthSwiftNameSupport.h"
+>>>>>>> 632786356c5c0ae9c23e9749fa0687cd79ce70e5
 #import "FIRAuthUIDelegate.h"
 #import "FIREmailAuthProvider.h"
 #import "FIRFacebookAuthProvider.h"

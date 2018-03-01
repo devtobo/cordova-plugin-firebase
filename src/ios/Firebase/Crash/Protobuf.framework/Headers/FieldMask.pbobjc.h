@@ -252,12 +252,15 @@ typedef GPB_ENUM(GPBFieldMask_FieldNumber) {
  *
  * Note that oneof type names ("test_oneof" in this case) cannot be used in
  * paths.
+<<<<<<< HEAD
  *
  * ## Field Mask Verification
  *
  * The implementation of the all the API methods, which have any FieldMask type
  * field in the request, should verify the included field paths, and return
  * `INVALID_ARGUMENT` error if any path is duplicated or unmappable.
+=======
+>>>>>>> 632786356c5c0ae9c23e9749fa0687cd79ce70e5
  **/
 @interface GPBFieldMask : GPBMessage
 

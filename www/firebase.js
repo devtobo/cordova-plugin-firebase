@@ -1,10 +1,11 @@
 var exec = require('cordova/exec');
-exports.getVerificationID = function(number, success, error) {
-    exec(success, error, "FirebasePlugin", "getVerificationID", [number]);
-};
 
 exports.getInstanceId = function(success, error) {
     exec(success, error, "FirebasePlugin", "getInstanceId", []);
+};
+
+exports.getId = function(success, error) {
+  exec(success, error, "FirebasePlugin", "getId", []);
 };
 
 exports.getToken = function(success, error) {
@@ -123,10 +124,6 @@ exports.setDefaults = function (defaults, namespace, success, error) {
     exec(success, error, "FirebasePlugin", "setDefaults", args);
 };
 
-exports.verifyPhoneNumber = function(number, timeOutDuration, success, error) {
-    exec(success, error, "FirebasePlugin", "verifyPhoneNumber", [number, timeOutDuration]);
-};
-
 
 // Crashlytics
 
@@ -148,24 +145,20 @@ exports.logCrashlytics = function(message, success, error) {
 
 // Performance
 
-exports.sendImmediateTraceCounter = function(traceName, counterName, counterValue, success, error) {
-    exec(success, error, "FirebasePlugin", "sendImmediateTraceCounter", [traceName, counterName, counterValue]);
-};
-
 exports.startTrace = function(traceName, success, error) {
     exec(success, error, "FirebasePlugin", "startTrace", [traceName]);
+};
+
+exports.incrementCounter = function (name, counterNamed, success, error) {
+    exec(success, error, "FirebasePlugin", "incrementCounter", [name, counterNamed]);
 };
 
 exports.stopTrace = function(traceName, success, error) {
     exec(success, error, "FirebasePlugin", "stopTrace", [traceName]);
 };
 
-exports.traceIncrementCounterByValue = function(traceName, counterName, counterValue, success, error) {
-    exec(success, error, "FirebasePlugin", "traceIncrementCounterByValue", [traceName, counterName, counterValue]);
-};
-
-exports.reportCacheSize = function(success, error) {
-    exec(success, error, "FirebasePlugin", "reportCacheSize", []);
+exports.sendImmediateTraceCounter = function(traceName, counterName, counterValue, success, error) {
+    exec(success, error, "FirebasePlugin", "sendImmediateTraceCounter", [traceName, counterName, counterValue]);
 };
 
 // Dynamic Links

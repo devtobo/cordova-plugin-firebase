@@ -190,7 +190,11 @@ typedef NS_ENUM(NSInteger, FIRActionCodeOperation) {
     /** Action code for recover email operation. */
     FIRActionCodeOperationRecoverEmail = 3,
 
+<<<<<<< HEAD
 } NS_SWIFT_NAME(ActionCodeOperation);
+=======
+} FIR_SWIFT_NAME(ActionCodeOperation);
+>>>>>>> 632786356c5c0ae9c23e9749fa0687cd79ce70e5
 
 /**
     @brief The operation being performed.

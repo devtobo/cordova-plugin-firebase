@@ -32,7 +32,6 @@ var PLATFORM = {
     IOS: {
         dest: [
             IOS_DIR + '/' + name + '/Resources/GoogleService-Info.plist',
-            IOS_DIR + '/' + name + '/Resources/Resources/GoogleService-Info.plist'
         ],
         src: [
             'GoogleService-Info.plist',
@@ -49,31 +48,9 @@ var PLATFORM = {
             ANDROID_DIR + '/assets/www/google-services.json',
             'www/google-services.json'
         ],
-        stringsXml: ANDROID_DIR + '/app/src/main/res/values/strings.xml'
     }
 };
 
-function updateStringsXml(contents) {
-    var json = JSON.parse(contents);
-    var strings = fs.readFileSync(PLATFORM.ANDROID.stringsXml).toString();
-
-    // strip non-default value
-    strings = strings.replace(new RegExp('<string name="google_app_id">([^\@<]+?)</string>', 'i'), '');
-
-    // strip non-default value
-    strings = strings.replace(new RegExp('<string name="google_api_key">([^\@<]+?)</string>', 'i'), '');
-
-    // strip empty lines
-    strings = strings.replace(new RegExp('(\r\n|\n|\r)[ \t]*(\r\n|\n|\r)', 'gm'), '$1');
-
-    // replace the default value
-    strings = strings.replace(new RegExp('<string name="google_app_id">([^<]+?)</string>', 'i'), '<string name="google_app_id">' + json.client[0].client_info.mobilesdk_app_id + '</string>');
-
-    // replace the default value
-    strings = strings.replace(new RegExp('<string name="google_api_key">([^<]+?)</string>', 'i'), '<string name="google_api_key">' + json.client[0].api_key[0].current_key + '</string>');
-
-    fs.writeFileSync(PLATFORM.ANDROID.stringsXml, strings);
-}
 
 function copyKey(platform, callback) {
     for (var i = 0; i < platform.src.length; i++) {
@@ -180,67 +157,6 @@ function patchProjectLevelGradleBuildFiles() {
     
     var contents = fs.writeFileSync(projectBuildGradle, newContents, {encoding: 'utf8'});
     console.log("Written to :", projectBuildGradle)
-
-
-    /**
-     * Actions on project-level build.gradle:
-     * Firebase Core:
-     *   
-     *  buildscript {
-     *      dependencies {
-     *          classpath 'com.google.gms:google-services:3.2.0' // google-services plugin
-     *      }
-     *  }
-     * 
-     *  allprojects {
-     *      repositories {
-     *          maven {
-     *              url "https://maven.google.com" // Google's Maven repository
-     *          }
-     *      }
-     *  }
-     * 
-     * Crashlytics:
-     *  buildscript {
-     *      repositories {
-     *          maven {
-     *             url 'https://maven.fabric.io/public'
-     *          }
-     *      }
-     *      dependencies {
-     *          classpath 'io.fabric.tools:gradle:1.25.1'
-     *      }
-     *  }
-     *  allprojects {
-     *      repositories {
-     *         maven {
-     *             url 'https://maven.google.com/'
-     *         }
-     *      }
-     *  }
-     * 
-     */
-
-    // console.log("---- BEFORE:")
-    // console.log(JSON.stringify(gradle_parsed, null, '    '))
-
-    // var buildscript = gradle_parsed.buildscript
-    // var repositories = buildscript.repositories
-    // var hasFabric = repositories.find((repo) => repo.maven && repo.maven.url && repo.maven.url.match('maven.fabric.io'))
-    // if (!hasFabric) {
-    //     repositories.push({
-    //         maven: {
-    //             url: 'https://maven.fabric.io/public'
-    //         }
-    //     })
-    // }
-
-    // console.log("---- AFTER:")
-    // console.log(JSON.stringify(gradle_parsed, null, '    '))
-
-    // var newGradleBuild = makeGradleText(gradle_parsed)
-    // console.log("Gradle.build: \n======\n" + newGradleBuild)
-
 }
 
 
@@ -249,7 +165,6 @@ function patchAppLevelGradleBuildFiles() {
 
     var contents = fs.readFileSync(appBuildGradle, 'utf8');
     
-    // var hasFabricMaven = contents.match('https://maven.fabric.io/public')
     var hasFabricPlugin = contents.match("apply plugin: 'io.fabric'")
     var hasFirebasePerfPlugin = contents.match("apply plugin: 'com.google.firebase.firebase-perf'")
     
@@ -258,6 +173,9 @@ function patchAppLevelGradleBuildFiles() {
     
 
     for (var i = 0 ; i < length-1 ; i++) {
+        /**
+         * Add apply plugin directives
+         */
         if (split[i].match("apply plugin: 'com.android.application'")) {
             if (!hasFabricPlugin) {
                 split.splice(i+1, 0, "apply plugin: 'io.fabric'")
@@ -322,4 +240,3 @@ module.exports = function (context) {
         copyKey(PLATFORM.ANDROID, patchGradleBuildFiles)
     }
 };
-

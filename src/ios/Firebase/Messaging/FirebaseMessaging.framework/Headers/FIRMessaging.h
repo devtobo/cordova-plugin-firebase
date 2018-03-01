@@ -245,14 +245,22 @@ NS_SWIFT_NAME(MessagingDelegate)
 /// * Subscribing to any topics.
 - (void)messaging:(nonnull FIRMessaging *)messaging
     didReceiveRegistrationToken:(nonnull NSString *)fcmToken
+<<<<<<< HEAD
     NS_SWIFT_NAME(messaging(_:didReceiveRegistrationToken:));
+=======
+    FIR_SWIFT_NAME(messaging(_:didReceiveRegistrationToken:));
+>>>>>>> 632786356c5c0ae9c23e9749fa0687cd79ce70e5
 
 /// This method will be called whenever FCM receives a new, default FCM token for your
 /// Firebase project's Sender ID. This method is deprecated. Please use
 /// `messaging:didReceiveRegistrationToken:`.
 - (void)messaging:(nonnull FIRMessaging *)messaging
     didRefreshRegistrationToken:(nonnull NSString *)fcmToken
+<<<<<<< HEAD
     NS_SWIFT_NAME(messaging(_:didRefreshRegistrationToken:))
+=======
+    FIR_SWIFT_NAME(messaging(_:didRefreshRegistrationToken:))
+>>>>>>> 632786356c5c0ae9c23e9749fa0687cd79ce70e5
     __deprecated_msg("Please use messaging:didReceiveRegistrationToken:, which is called for both \
                      current and refreshed tokens.");
 

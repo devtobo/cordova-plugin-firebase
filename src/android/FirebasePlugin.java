@@ -13,6 +13,7 @@ import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
 import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
@@ -78,14 +79,12 @@ public class FirebasePlugin extends CordovaPlugin {
         this.cordova.getThreadPool().execute(new Runnable() {
             public void run() {
                 Log.d(TAG, "Starting Firebase plugin");
+                FirebaseApp.initializeApp(context);
                 mFirebaseAnalytics = FirebaseAnalytics.getInstance(context);
                 mFirebaseAnalytics.setAnalyticsCollectionEnabled(true);
                 if (extras != null && extras.size() > 1) {
                     if (FirebasePlugin.notificationStack == null) {
                         FirebasePlugin.notificationStack = new ArrayList<Bundle>();
-                    }
-                    if (FirebasePlugin.tracesMap == null) {
-                        FirebasePlugin.tracesMap = new HashMap<String, Trace>();
                     }
                     if (extras.containsKey("google.message_id")) {
                         extras.putBoolean("tap", true);
@@ -100,6 +99,9 @@ public class FirebasePlugin extends CordovaPlugin {
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
         if (action.equals("getInstanceId")) {
             this.getInstanceId(callbackContext);
+            return true;
+        } else if (action.equals("getId")) {
+            this.getId(callbackContext);
             return true;
         } else if (action.equals("getToken")) {
             this.getToken(callbackContext);
@@ -171,47 +173,32 @@ public class FirebasePlugin extends CordovaPlugin {
         } else if (action.equals("verifyPhoneNumber")) {
             this.verifyPhoneNumber(callbackContext, args.getString(0), args.getInt(1));
             return true;
-        }
-        else if (action.equals("onDynamicLink")) {
-            this.onDynamicLink(callbackContext);
-            return true;
-        }
-        // crashlytics
-        else if (action.equals("sendJavascriptError")) {
-            this.sendJavascriptError(callbackContext, args.getString(0), args.getString(1), args.getJSONArray(2));
-            return true;
-        }
-        else if (action.equals("sendUserError")) {
-            this.sendUserError(callbackContext, args.getString(0), args.getJSONObject(1));
-            return true;
-        }
-        else if (action.equals("setCrashlyticsValue")) {
-            this.setCrashlyticsValue(callbackContext, args.getString(0), args.getString(1));
-            return true;
-        }
-        else if (action.equals("logCrashlytics")) {
-            this.logCrashlytics(callbackContext, args.getString(0));
-            return true;
-        }
-        // performance
-        else if (action.equals("startTrace")) {
+        } else if (action.equals("startTrace")) {
             this.startTrace(callbackContext, args.getString(0));
             return true;
-        }
-        else if (action.equals("stopTrace")) {
+        } else if (action.equals("incrementCounter")) {
+            this.incrementCounter(callbackContext, args.getString(0), args.getString(1));
+            return true;
+        } else if (action.equals("stopTrace")) {
             this.stopTrace(callbackContext, args.getString(0));
             return true;
-        }
-        else if (action.equals("traceIncrementCounterByValue")) {
-            this.traceIncrementCounterByValue(callbackContext, args.getString(0), args.getString(1), args.getInt(2));
-            return true;
-        }
-        else if (action.equals("sendImmediateTraceCounter")) {
+        } else if (action.equals("sendImmediateTraceCounter")) {
             this.sendImmediateTraceCounter(callbackContext, args.getString(0), args.getString(1), args.getInt(2));
             return true;
-        }
-        else if (action.equals("reportCacheSize")) {
-            this.reportCacheSize(callbackContext);
+        } else if (action.equals("onDynamicLink")) {
+            this.onDynamicLink(callbackContext);
+            return true;
+        } else if (action.equals("sendJavascriptError")) {
+            this.sendJavascriptError(callbackContext, args.getString(0), args.getString(1), args.getJSONArray(2));
+            return true;
+        } else if (action.equals("sendUserError")) {
+            this.sendUserError(callbackContext, args.getString(0), args.getJSONObject(1));
+            return true;
+        } else if (action.equals("setCrashlyticsValue")) {
+            this.setCrashlyticsValue(callbackContext, args.getString(0), args.getString(1));
+            return true;
+        } else if (action.equals("logCrashlytics")) {
+            this.logCrashlytics(callbackContext, args.getString(0));
             return true;
         }
         return false;
@@ -338,6 +325,19 @@ public class FirebasePlugin extends CordovaPlugin {
         });
     }
 
+    private void getId(final CallbackContext callbackContext) {
+        cordova.getThreadPool().execute(new Runnable() {
+            public void run() {
+                try {
+                    String id = FirebaseInstanceId.getInstance().getId();
+                    callbackContext.success(id);
+                } catch (Exception e) {
+                    callbackContext.error(e.getMessage());
+                }
+            }
+        });
+    }
+
     private void getToken(final CallbackContext callbackContext) {
         cordova.getThreadPool().execute(new Runnable() {
             public void run() {
@@ -431,10 +431,6 @@ public class FirebasePlugin extends CordovaPlugin {
             public void run() {
                 try {
                     FirebaseInstanceId.getInstance().deleteInstanceId();
-                    String currentToken = FirebaseInstanceId.getInstance().getToken();
-                    if (currentToken != null) {
-                        FirebasePlugin.sendToken(currentToken);
-                    }
                     callbackContext.success();
                 } catch (Exception e) {
                     callbackContext.error(e.getMessage());
@@ -761,8 +757,9 @@ public class FirebasePlugin extends CordovaPlugin {
     }
 
 
-    ///////////////////////////
+    //
     // Crashlytics
+    //
 
     private void sendJavascriptError(final CallbackContext callbackContext, final String message, final String fileName, final JSONArray jsonStackFrames) {
         cordova.getThreadPool().execute(new Runnable() {
@@ -843,58 +840,95 @@ public class FirebasePlugin extends CordovaPlugin {
         });
     }
 
-    private void startTrace(final CallbackContext callbackContext, final String traceName) {
+    //
+    // Firebase Performace
+    //
+
+    private HashMap<String,Trace> traces = new HashMap<String,Trace>();
+
+    private void startTrace(final CallbackContext callbackContext, final String name){
+        final FirebasePlugin self = this;
         cordova.getThreadPool().execute(new Runnable() {
             public void run() {
-            try {
-                Trace myTrace = FirebasePerformance.getInstance().newTrace(traceName);
-                myTrace.start();
+                try {
 
-                FirebasePlugin.tracesMap.put(traceName, myTrace);
+                    Trace myTrace = null;
+                    if ( self.traces.containsKey(name) ){
+                        myTrace = self.traces.get(name);
+                    }
 
-                callbackContext.success();
-            } catch (Exception e) {
-                callbackContext.error(e.getMessage());
-            }
+                    if ( myTrace == null ){
+                        myTrace = FirebasePerformance.getInstance().newTrace(name);
+                        myTrace.start();
+                        self.traces.put(name, myTrace);
+                    }
+
+                    callbackContext.success();
+                } catch (Exception e) {
+                    FirebaseCrash.log(e.getMessage());
+                    e.printStackTrace();
+                    callbackContext.error(e.getMessage());
+                }
             }
         });
     }
 
-    private void stopTrace(final CallbackContext callbackContext, final String traceName) {
+    private void incrementCounter(final CallbackContext callbackContext, final String name, final String counterNamed){
+        final FirebasePlugin self = this;
         cordova.getThreadPool().execute(new Runnable() {
             public void run() {
                 try {
-                    Trace myTrace = FirebasePlugin.tracesMap.get(traceName);
-                    if (myTrace != null) {
+
+                    Trace myTrace = null;
+                    if ( self.traces.containsKey(name) ){
+                        myTrace = self.traces.get(name);
+                    }
+
+                    if ( myTrace != null && myTrace instanceof Trace ){
+                        myTrace.incrementCounter(counterNamed);
+                        callbackContext.success();
+                    }else{
+                        callbackContext.error("Trace not found");
+                    }
+
+                } catch (Exception e) {
+                    FirebaseCrash.log(e.getMessage());
+                    e.printStackTrace();
+                    callbackContext.error(e.getMessage());
+                }
+            }
+        });
+    }
+
+    private void stopTrace(final CallbackContext callbackContext, final String name){
+        final FirebasePlugin self = this;
+        cordova.getThreadPool().execute(new Runnable() {
+            public void run() {
+                try {
+
+                    Trace myTrace = null;
+                    if ( self.traces.containsKey(name) ){
+                        myTrace = self.traces.get(name);
+                    }
+
+                    if ( myTrace != null && myTrace instanceof Trace ){ //
                         myTrace.stop();
-                        FirebasePlugin.tracesMap.remove(traceName);
+                        self.traces.remove(name);
+                        callbackContext.success();
+                    }else{
+                        callbackContext.error("Trace not found");
                     }
 
-                    callbackContext.success();
                 } catch (Exception e) {
+                    FirebaseCrash.log(e.getMessage());
+                    e.printStackTrace();
                     callbackContext.error(e.getMessage());
                 }
             }
         });
     }
 
-    private void traceIncrementCounterByValue(final CallbackContext callbackContext, final String traceName, final String counterName, final int byValue) {
-        cordova.getThreadPool().execute(new Runnable() {
-            public void run() {
-                try {
-                    Trace myTrace = FirebasePlugin.tracesMap.get(traceName);
-                    if (myTrace != null) {
-                        myTrace.incrementCounter(counterName, byValue);
-                    }
-
-                    callbackContext.success();
-                } catch (Exception e) {
-                    callbackContext.error(e.getMessage());
-                }
-            }
-        });
-    }
-
+    
     private void sendImmediateTraceCounter(final CallbackContext callbackContext, final String traceName, final String counterName, final int byValue) {
         cordova.getThreadPool().execute(new Runnable() {
             public void run() {
@@ -906,72 +940,18 @@ public class FirebasePlugin extends CordovaPlugin {
 
                     callbackContext.success();
                 } catch (Exception e) {
+                    FirebaseCrash.log(e.getMessage());
+                    e.printStackTrace();
                     callbackContext.error(e.getMessage());
                 }
             }
         });
     }
 
-    private void reportCacheSize(final CallbackContext callbackContext) {
-        cordova.getThreadPool().execute(new Runnable() {
-            public void run() {
-                try {
-                    long cacheSize = getDirSize(cacheDir) / 1000000;
 
-                    Trace myTrace = FirebasePerformance.getInstance().newTrace("report_cache_size");
-                    myTrace.start();
-                    myTrace.incrementCounter("cache_size_mo", cacheSize);
-                    myTrace.stop();
-
-                    callbackContext.success();
-                } catch (Exception e) {
-                    callbackContext.error(e.getMessage());
-                }
-            }
-        });
-    }
-
-    private static boolean isValidDir(File dir){
-        if (dir != null && dir.exists() && dir.isDirectory()){
-            return true;
-        }else{
-            return false;
-        }
-    }
-    private static boolean isSymlink(File file) throws IOException {
-        File canon;
-        if (file.getParent() == null) {
-            canon = file;
-        } else {
-            canon = new File(file.getParentFile().getCanonicalFile(),
-                    file.getName());
-        }
-        return !canon.getCanonicalFile().equals(canon.getAbsoluteFile());
-    }
-    public static long getDirSize(File dir){
-        if (!isValidDir(dir))
-            return 0L;
-        File[] files = dir.listFiles();
-        //Guard for null pointer exception on files
-        if (files == null){
-            return 0L;
-        }else{
-            long size = 0L;
-            for(File file : files){
-                if (file.isFile()){
-                    size += file.length();
-                }else{
-                    try{
-                        if (!isSymlink(file)) size += getDirSize(file);
-                    }catch (IOException ioe){
-                        //digest exception
-                    }
-                }
-            }
-            return size;
-        }
-    }
-
+    //
+    // Dynamic Links
+    //
 
     private void onDynamicLink(final CallbackContext callbackContext) {
         cordova.getThreadPool().execute(new Runnable() {
@@ -1007,39 +987,6 @@ public class FirebasePlugin extends CordovaPlugin {
                 }
             });
     }
-
-    /*
-
-    else if (action.equals("startTrace")) {
-        this.startTrace(callbackContext, args.getString(0));
-        return true;
-    }
-    else if (action.equals("stopTrace")) {
-        this.stopTrace(callbackContext, args.getString(0));
-        return true;
-    }
-    else if (action.equals("traceIncrementCounterByValue")) {
-        this.traceIncrementCounterByValue(callbackContext, args.getString(0), args.getString(1), args.getInt(2));
-        return true;
-    }
-
-    else if (action.equals("sendJavascriptError")) {
-        this.sendJavascriptError(callbackContext, args.getString(0), args.getString(1), args.getString(2));
-        return true;
-    }
-    else if (action.equals("sendUserError")) {
-        this.sendUserError(callbackContext, args.getString(0), args.getJSONObject(1));
-        return true;
-    }
-    else if (action.equals("setCrashlyticsValue")) {
-        this.setCrashlyticsValue(callbackContext, args.getString(0), args.getString(1));
-        return true;
-    }
-    else if (action.equals("logCrashlytics")) {
-        this.logCrashlytics(callbackContext, args.getString(0));
-        return true;
-        */
-
 }
 
 

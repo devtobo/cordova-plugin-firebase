@@ -149,8 +149,12 @@ exports.startTrace = function(traceName, success, error) {
     exec(success, error, "FirebasePlugin", "startTrace", [traceName]);
 };
 
-exports.incrementCounter = function (name, counterNamed, success, error) {
-    exec(success, error, "FirebasePlugin", "incrementCounter", [name, counterNamed]);
+exports.incrementCounter = function (traceName, counterName, success, error) {
+    exec(success, error, "FirebasePlugin", "incrementCounter", [traceName, counterName]);
+};
+
+exports.incrementCounterByValue = function (traceName, counterName, counterValue, success, error) {
+    exec(success, error, "FirebasePlugin", "incrementCounterByValue", [traceName, counterName, counterValue]);
 };
 
 exports.stopTrace = function(traceName, success, error) {

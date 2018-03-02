@@ -9,6 +9,7 @@
  */
 var fs = require('fs');
 var path = require('path');
+var iosHelper = require('./ios-helper');
 
 fs.ensureDirSync = function (dir) {
     if (!fs.existsSync(dir)) {
@@ -22,6 +23,7 @@ fs.ensureDirSync = function (dir) {
     }
 };
 
+var $context = null
 var config = fs.readFileSync('config.xml').toString();
 var name = getValue(config, 'name');
 
@@ -202,27 +204,11 @@ function patchGradleBuildFiles() {
 }
 
 
-function recusiveTextConvert(obj, k) {
-    var text = "";
-    if (Array.isArray(obj)) {
-        obj.forEach(function (o, key) {
-            text += k + " " + recusiveTextConvert(o);
-        })
-    } else if (typeof obj === 'object' && obj !== null) {
-        text += k ? k + "{\n" : ""
-        Object.keys(obj).forEach(function (key) {
-            text += recusiveTextConvert(obj[key], key)
-        })
-        text += k ? "}\n" : ""
-    } else {
-        text += k ? k : ""
-        text += " " + obj + "\n"
-    }
-    return text;
-}
+function setupShellScriptBuildPhase() {
+    var projectPath = path.join(IOS_DIR, name + ".xcodeproj", "project.pbxproj");
 
-function makeGradleText(obj) {
-    return recusiveTextConvert(obj);
+    iosHelper.removeShellScriptBuildPhase($context, projectPath)
+    iosHelper.addShellScriptBuildPhase($context, projectPath)
 }
 
 
@@ -230,10 +216,12 @@ function makeGradleText(obj) {
 module.exports = function (context) {
     //get platform from the context supplied by cordova
     var platforms = context.opts.platforms;
+    $context = context
+
     // Copy key files to their platform specific folders
     if (platforms.indexOf('ios') !== -1 && directoryExists(IOS_DIR)) {
         console.log('Preparing Firebase on iOS');
-        copyKey(PLATFORM.IOS);
+        copyKey(PLATFORM.IOS, setupShellScriptBuildPhase);
     }
     if (platforms.indexOf('android') !== -1 && directoryExists(ANDROID_DIR)) {
         console.log('Preparing Firebase on Android');

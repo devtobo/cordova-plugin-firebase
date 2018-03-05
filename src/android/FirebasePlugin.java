@@ -865,7 +865,7 @@ public class FirebasePlugin extends CordovaPlugin {
 
                     callbackContext.success();
                 } catch (Exception e) {
-                    FirebaseCrash.log(e.getMessage());
+                    Crashlytics.log(e.getMessage());
                     e.printStackTrace();
                     callbackContext.error(e.getMessage());
                 }
@@ -892,7 +892,7 @@ public class FirebasePlugin extends CordovaPlugin {
                     }
 
                 } catch (Exception e) {
-                    FirebaseCrash.log(e.getMessage());
+                    Crashlytics.log(e.getMessage());
                     e.printStackTrace();
                     callbackContext.error(e.getMessage());
                 }
@@ -920,7 +920,7 @@ public class FirebasePlugin extends CordovaPlugin {
                     }
 
                 } catch (Exception e) {
-                    FirebaseCrash.log(e.getMessage());
+                    Crashlytics.log(e.getMessage());
                     e.printStackTrace();
                     callbackContext.error(e.getMessage());
                 }
@@ -940,7 +940,7 @@ public class FirebasePlugin extends CordovaPlugin {
 
                     callbackContext.success();
                 } catch (Exception e) {
-                    FirebaseCrash.log(e.getMessage());
+                    Crashlytics.log(e.getMessage());
                     e.printStackTrace();
                     callbackContext.error(e.getMessage());
                 }

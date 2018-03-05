@@ -1,7 +1,6 @@
 
 var fs = require("fs");
 var path = require("path");
-var utilities = require('./utilities')
 
 /**
  * This is used as the display text for the build phase block in XCode as well as the

@@ -44,12 +44,14 @@
         class_getInstanceMethod(self, @selector(firebase_plugin_application:didFinishLaunchingWithOptions:))
     );
     
-#if HAVE_BATCH
-    method_exchangeImplementations(
-        class_getInstanceMethod(self, @selector(application:continueUserActivity:restorationHandler:)),
-        class_getInstanceMethod(self, @selector(firebase_plugin_application:continueUserActivity:restorationHandler:))
-    );
-#endif
+    Method szMethod = class_getInstanceMethod(self, @selector(firebase_plugin_application:continueUserActivity:restorationHandler:));
+    Method cua_method = class_getInstanceMethod(self, @selector(application:continueUserActivity:restorationHandler:));
+    if (cua_method) {
+        method_exchangeImplementations(cua_method, szMethod);
+    }
+    else {
+        class_addMethod(self, @selector(application:continueUserActivity:restorationHandler:), method_getImplementation(szMethod), method_getTypeEncoding(szMethod));
+    }
 }
 
 - (void)setDelegate:(id)delegate {

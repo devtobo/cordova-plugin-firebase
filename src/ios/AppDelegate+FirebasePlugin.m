@@ -234,7 +234,7 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
     [FirebasePlugin.firebasePlugin sendNotification:mutableUserInfo];
              
 #if HAVE_BATCH
-    [BatchPush handleUserNotificationCenter:center willPresentNotification:notification willShowSystemForegroundAlert:NO];
+    [BatchPush handleUserNotificationCenter:center willPresentNotification:response.notification willShowSystemForegroundAlert:NO];
 #endif
 
     completionHandler();

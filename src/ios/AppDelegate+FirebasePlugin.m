@@ -3,11 +3,13 @@
 #import "Firebase.h"
 #import <objc/runtime.h>
 
-#define HAVE_BATCH 0
-
-#if HAVE_BATCH
+#if __has_include("BatchCordovaPlugin.h")
+#define HAVE_BATCH 1
 #import <BatchBridge/Batch.h>
+#else
+#define HAVE_BATCH 0
 #endif
+
 
 #if defined(__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
 @import UserNotifications;

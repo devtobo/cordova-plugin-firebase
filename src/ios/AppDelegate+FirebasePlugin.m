@@ -44,14 +44,28 @@
         class_getInstanceMethod(self, @selector(firebase_plugin_application:didFinishLaunchingWithOptions:))
     );
     
-    Method szMethod = class_getInstanceMethod(self, @selector(firebase_plugin_application:continueUserActivity:restorationHandler:));
-    Method cua_method = class_getInstanceMethod(self, @selector(application:continueUserActivity:restorationHandler:));
-    if (cua_method) {
-        method_exchangeImplementations(cua_method, szMethod);
+    /**
+     * We want to implement application:continueUserActivity:restorationHandler: while calling other plugins
+     * implementations if there are any.
+     * The easiest way is to setup a dummy implememtation if there are none, the swizzle it as normal
+     */
+    SEL cuaSel = @selector(application:continueUserActivity:restorationHandler:);
+    SEL szCuaSel = @selector(firebase_plugin_application:continueUserActivity:restorationHandler:);
+    
+    Method cuaMethod = class_getInstanceMethod(self, cuaSel);
+    Method szCuaMethod = class_getInstanceMethod(self, szCuaSel);
+    
+    if (!cuaMethod) {
+        // Create method that always returns NO if application:continueUserActivity:restorationHandler: is not implemented
+        IMP newImplementation = imp_implementationWithBlock(^(__unsafe_unretained id self, va_list argp) {
+            return NO;
+        });
+        class_addMethod(self, cuaSel, newImplementation, method_getTypeEncoding(szCuaMethod));
+        cuaMethod = class_getInstanceMethod(self, cuaSel);
     }
-    else {
-        class_addMethod(self, @selector(application:continueUserActivity:restorationHandler:), method_getImplementation(szMethod), method_getTypeEncoding(szMethod));
-    }
+    
+    // Now exchange implementation with the original method or the dummy method
+    method_exchangeImplementations(cuaMethod, szCuaMethod);
 }
 
 - (void)setDelegate:(id)delegate {

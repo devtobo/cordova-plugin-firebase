@@ -11,6 +11,9 @@ var fs = require('fs');
 var path = require('path');
 var iosHelper = require('./ios-helper');
 
+var pluginPackage = require('../package.json');
+var pluginId = pluginPackage.name;
+
 fs.ensureDirSync = function (dir) {
     if (!fs.existsSync(dir)) {
         dir.split(path.sep).reduce(function (currentPath, folder) {
@@ -208,7 +211,7 @@ function setupShellScriptBuildPhase() {
     var projectPath = path.join(IOS_DIR, name + ".xcodeproj", "project.pbxproj");
 
     iosHelper.removeShellScriptBuildPhase($context, projectPath)
-    iosHelper.addShellScriptBuildPhase($context, projectPath)
+    iosHelper.addShellScriptBuildPhase($context, pluginId, projectPath)
 }
 
 

@@ -16,7 +16,7 @@ module.exports = {
      * tool with the API and Secret keys. This tool is used to upload the debug symbols
      * (dSYMs) so that Crashlytics can display stack trace information in it's web console.
      */
-    addShellScriptBuildPhase: function (context, xcodeProjectPath) {
+    addShellScriptBuildPhase: function (context, pluginId, xcodeProjectPath) {
 
         var xcode = context.requireCordovaModule("xcode");
 
@@ -30,7 +30,7 @@ module.exports = {
         var name = config.name();
 
         // Build the body of the script to be executed during the build phase.
-        var script = '"' + '\\"${SRCROOT}\\"' + "/\\\"" + name + "\\\"/Plugins/cordova-plugin-firebase/Fabric.framework/run" + '"';
+        var script = '"' + '\\"${SRCROOT}\\"' + "/\\\"" + name + "\\\"/Plugins/" + pluginId + "/Fabric.framework/run" + '"';
 
         // Generate a unique ID for our new build phase.
         var id = xcodeProject.generateUuid();

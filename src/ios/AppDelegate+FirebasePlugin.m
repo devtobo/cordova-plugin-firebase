@@ -90,6 +90,10 @@
     [self firebase_plugin_application:application didFinishLaunchingWithOptions:launchOptions];
 
     if(![FIRApp defaultApp]) {
+
+//        FIRRemoteConfig *remoteConfig = [FIRRemoteConfig remoteConfig];
+//        remoteConfig.configSettings = [[FIRRemoteConfigSettings alloc] initWithDeveloperModeEnabled:YES];
+
         [FIRApp configure];
     }
 

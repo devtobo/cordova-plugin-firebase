@@ -309,11 +309,37 @@ static FirebasePlugin *firebasePlugin;
                     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
                     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
                 }
+                else {
+                    NSString *errorMessage = @"Unknown error";
+                    if (status == FIRRemoteConfigFetchStatusThrottled) {
+                        NSTimeInterval throttleEndTime = [[[error userInfo] valueForKey:FIRRemoteConfigThrottledEndTimeInSecondsKey] doubleValue];
+                        NSDate *endDate = [NSDate dateWithTimeIntervalSince1970:throttleEndTime];
+                        errorMessage = [NSString stringWithFormat:@"Throttled until %@", endDate];
+                    }
+                    else if (status == FIRRemoteConfigFetchStatusFailure) {
+                        errorMessage = @"Failure";
+                    }
+                    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:errorMessage];
+                    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+                }
             }];
         } else {
             [remoteConfig fetchWithCompletionHandler:^(FIRRemoteConfigFetchStatus status, NSError * _Nullable error) {
                 if (status == FIRRemoteConfigFetchStatusSuccess) {
                     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+                    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+                }
+                else {
+                    NSString *errorMessage = @"Unknown error";
+                    if (status == FIRRemoteConfigFetchStatusThrottled) {
+                        NSTimeInterval throttleEndTime = [[[error userInfo] valueForKey:FIRRemoteConfigThrottledEndTimeInSecondsKey] doubleValue];
+                        NSDate *endDate = [NSDate dateWithTimeIntervalSince1970:throttleEndTime];
+                        errorMessage = [NSString stringWithFormat:@"Throttled until %@", endDate];
+                    }
+                    else if (status == FIRRemoteConfigFetchStatusFailure) {
+                        errorMessage = @"Failure";
+                    }
+                    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:errorMessage];
                     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
                 }
             }];
@@ -323,14 +349,11 @@ static FirebasePlugin *firebasePlugin;
 
 - (void)activateFetched:(CDVInvokedUrlCommand *)command {
      [self.commandDelegate runInBackground:^{
-        FIRRemoteConfig* remoteConfig = [FIRRemoteConfig remoteConfig];
+         FIRRemoteConfig* remoteConfig = [FIRRemoteConfig remoteConfig];
          BOOL activated = [remoteConfig activateFetched];
          CDVPluginResult *pluginResult;
-         if (activated) {
-             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-         } else {
-             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
-         }
+         
+         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:activated];
 
          [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
      }];

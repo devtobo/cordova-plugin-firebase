@@ -265,13 +265,27 @@ static FirebasePlugin *firebasePlugin;
     }];
 }
 
+- (void)setAnalyticsCollectionEnabled:(CDVInvokedUrlCommand *)command {
+     [self.commandDelegate runInBackground:^{
+         BOOL enabled = [[command argumentAtIndex:0] boolValue];
+
+         [[FIRAnalyticsConfiguration sharedInstance] setAnalyticsCollectionEnabled:enabled];
+
+         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+
+         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+     }];
+}
+
 - (void)setScreenName:(CDVInvokedUrlCommand *)command {
-    NSString* name = [command.arguments objectAtIndex:0];
+    [self.commandDelegate runInBackground:^{
+        NSString* name = [command.arguments objectAtIndex:0];
+ 
+        [FIRAnalytics setScreenName:name screenClass:NULL];
 
-    [FIRAnalytics setScreenName:name screenClass:NULL];
-
-    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    }];
 }
 
 - (void)setUserId:(CDVInvokedUrlCommand *)command {
@@ -435,7 +449,6 @@ static FirebasePlugin *firebasePlugin;
 
 #pragma mark - Performance
 
-
 - (void)startTrace:(CDVInvokedUrlCommand *)command {
     [self.commandDelegate runInBackground:^{
         NSString* traceName = [command.arguments objectAtIndex:0];
@@ -559,5 +572,6 @@ static FirebasePlugin *firebasePlugin;
         self.cachedDynamicLinkData = data;
     }
 }
+
 
 @end

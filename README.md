@@ -20,6 +20,8 @@ Thank you for your support!
 ## Installation
 See npm package for versions - https://www.npmjs.com/package/cordova-plugin-firebase
 
+Great installation and setup guide by Medium.com - [https://medium.com/@felipepucinelli/how-to-add-push...](https://medium.com/@felipepucinelli/how-to-add-push-notifications-in-your-cordova-application-using-firebase-69fac067e821)
+
 Install the plugin by adding it your project's config.xml:
 ```
 <plugin name="cordova-plugin-firebase" spec="0.1.25" />
@@ -59,9 +61,9 @@ Download your container-config json file from Tag Manager and add a resource-fil
 ```
 ....
 <platform name="android">
-        <content src="index.html" />
-        <resource-file src="GTM-5MFXXXX.json" target="assets/containers/GTM-5MFXXXX.json" />
-        ...
+    <content src="index.html" />
+    <resource-file src="GTM-5MFXXXX.json" target="assets/containers/GTM-5MFXXXX.json" />
+    ...
 ```
 
 ## Changing Notification Icon
@@ -426,6 +428,16 @@ Stop the trace
 window.FirebasePlugin.stopTrace("test trace");
 ```
 
+### setAnalyticsCollectionEnabled
+
+Enable/disable analytics collection
+
+```
+window.FirebasePlugin.setAnalyticsCollectionEnabled(true); // Enables analytics collection
+
+window.FirebasePlugin.setAnalyticsCollectionEnabled(false); // Disables analytics collection
+```
+
 ### Phone Authentication
 **BASED ON THE CONTRIBUTIONS OF**
 IOS
@@ -441,21 +453,20 @@ This method sends an SMS to the user with the SMS_code and gets the verification
 
 ```
 window.FirebasePlugin.getVerificationID("+573123456789",function(id) {
-                console.log("verificationID: "+id);
-
-            }, function(error) {             
-                console.error(error);
-            });
+    console.log("verificationID: "+id);
+}, function(error) {             
+    console.error(error);
+});
 ```
 
 Using Ionic2?
 ```
-  (<any>window).FirebasePlugin.getVerificationID("+573123456789", id => {
-          console.log("verificationID: " + id);
-          this.verificationId = id;
-        }, error => {
-          console.log("error: " + error);
-        });
+(<any>window).FirebasePlugin.getVerificationID("+573123456789", id => {
+    console.log("verificationID: " + id);
+    this.verificationId = id;
+}, error => {
+    console.log("error: " + error);
+});
 ```
 Get the intermediate AuthCredential object
 ```

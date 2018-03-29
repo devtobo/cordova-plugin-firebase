@@ -472,16 +472,19 @@ window.FirebasePlugin.sendImmediateTraceCounter("test trace", "retry", 42, succe
 ### sendJavascriptError
 
 Sends a non-fatal error, including a stack trace, to Crashlytics.
-The StackTraceJS library can be useful in extracting a stack trace from a JavaScript Exception, see https://github.com/stacktracejs/error-stack-parser
+The StackTrace.JS library can be useful in extracting a stack trace from a JavaScript Exception, see https://github.com/stacktracejs/error-stack-parser
 
 Here is an example on how to set-up an error handler in your app that will report all uncaught exceptions:
 
 ```
-var reportError = function (error) {
+var errorHandler = function (errorEvent) {
+    var error = errorEvent.error;
+
     // fileName is supported on some platforms but not all
     var fileName = error.fileName
 
     try {
+        // get a stack trace using stacktrace.js (not included in this plugin)
         var stack = ErrorStackParser.parse(error)
         var stackJsonObj = stack.map(function (frame) {
             return {
@@ -492,22 +495,17 @@ var reportError = function (error) {
             };
         })
         window.FirebasePlugin.sendJavascriptError(error.message, fileName, stackJsonObj)
-
-        alert('Reported error ' + error.message)
     } catch (error) {
         console.error('Handled error in firebase report error: ', error)
     }
-}
-
-var errorHandler = function (errorEvent) {
-    var error = errorEvent.error;
-    reportError(error);
 }
 
 window.addEventListener('error', errorHandler);
 ```
 
 ### sendUserError
+
+Sends a non-fatal error with a message and a group of key/values.
 
 ```
 var error = new Error("Test Error");

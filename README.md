@@ -22,14 +22,22 @@ See npm package for versions - https://www.npmjs.com/package/cordova-plugin-fire
 
 Great installation and setup guide by Medium.com - [https://medium.com/@felipepucinelli/how-to-add-push...](https://medium.com/@felipepucinelli/how-to-add-push-notifications-in-your-cordova-application-using-firebase-69fac067e821)
 
-Install the plugin by adding it your project's config.xml:
+Install the plugin by running:
 ```
-<plugin name="cordova-plugin-firebase" spec="0.1.25" />
+cordova plugin add cordova-plugin-firebase --APP_DOMAIN=123456.app.goo.gl
 ```
-or by running:
+
+or adding it to your project's package.json:
 ```
-cordova plugin add cordova-plugin-firebase@0.1.25 --save
+"cordova-plugin-firebase": {
+    "APP_DOMAIN": "123456.app.goo.gl",
+},
 ```
+
+Your APP_DOMAIN is used for Firebase Dynamic Links. You can find it when creating a Dynamic Link, or use a dummy one if you don't need to use dynamic links.
+
+You can use the variables GMS_VERSION and FIREBASE_VERSION to change the version of the libraries for Android.
+
 Download your Firebase configuration files, GoogleService-Info.plist for ios and google-services.json for android, and place them in the root folder of your cordova project:
 
 ```
@@ -46,6 +54,11 @@ Download your Firebase configuration files, GoogleService-Info.plist for ios and
 See https://support.google.com/firebase/answer/7015592 for details how to download the files from firebase.
 
 This plugin uses a hook (after prepare) that copies the configuration files to the right place, namely platforms/ios/\<My Project\>/Resources for ios and platforms/android for android.
+
+For iOS, the hook also adds a Shell Script build phase to upload your dSYM to Crashlytics automatically.
+
+For Android, the hook changes your build.gradle files to add the necessary build dependencies and gradle plugins needed. It tries as much as possible not to mess with the rest of the build.gradle, but you might run into issues if you are also modifying this file outside of cordova.
+
 
 **Note that the Firebase SDK requires the configuration files to be present and valid, otherwise your app will crash on boot or Firebase features won't work.**
 
@@ -253,6 +266,16 @@ Set a user property for use in Analytics:
 window.FirebasePlugin.setUserProperty("name", "value");
 ```
 
+### setAnalyticsCollectionEnabled
+
+Enable/disable analytics collection
+
+```
+window.FirebasePlugin.setAnalyticsCollectionEnabled(true); // Enables analytics collection
+
+window.FirebasePlugin.setAnalyticsCollectionEnabled(false); // Disables analytics collection
+```
+
 ### verifyPhoneNumber (Android only)
 
 Request a verificationId and send a SMS with a verificationCode.
@@ -420,6 +443,14 @@ To count the performance-related events that occur in your app (such as cache hi
 window.FirebasePlugin.incrementCounter("test trace", "retry", success, error);
 ```
 
+### incrementCounterByValue
+
+Same as incrementCounter, but allows incrementing by a value different than 1:
+
+```
+window.FirebasePlugin.incrementCounterByValue("test trace", "retry", 42, success, error);
+```
+
 ### stopTrace
 
 Stop the trace
@@ -428,15 +459,94 @@ Stop the trace
 window.FirebasePlugin.stopTrace("test trace");
 ```
 
-### setAnalyticsCollectionEnabled
+### sendImmediateTraceCounter
 
-Enable/disable analytics collection
+This is a shortcut method for starting a trace, setting a counter value, and then immediately stopping the trace. It can be useful if you're only interested in reporting a numeric value and not a duration-based trace.
 
 ```
-window.FirebasePlugin.setAnalyticsCollectionEnabled(true); // Enables analytics collection
-
-window.FirebasePlugin.setAnalyticsCollectionEnabled(false); // Disables analytics collection
+window.FirebasePlugin.sendImmediateTraceCounter("test trace", "retry", 42, success, error);
 ```
+
+
+
+### sendJavascriptError
+
+Sends a non-fatal error, including a stack trace, to Crashlytics.
+The StackTraceJS library can be useful in extracting a stack trace from a JavaScript Exception, see https://github.com/stacktracejs/error-stack-parser
+
+Here is an example on how to set-up an error handler in your app that will report all uncaught exceptions:
+
+```
+var reportError = function (error) {
+    // fileName is supported on some platforms but not all
+    var fileName = error.fileName
+
+    try {
+        var stack = ErrorStackParser.parse(error)
+        var stackJsonObj = stack.map(function (frame) {
+            return {
+                functionName: frame.functionName,
+                fileName: frame.fileName,
+                lineNumber: frame.lineNumber,
+                columnNumber: frame.columnNumber,
+            };
+        })
+        window.FirebasePlugin.sendJavascriptError(error.message, fileName, stackJsonObj)
+
+        alert('Reported error ' + error.message)
+    } catch (error) {
+        console.error('Handled error in firebase report error: ', error)
+    }
+}
+
+var errorHandler = function (errorEvent) {
+    var error = errorEvent.error;
+    reportError(error);
+}
+
+window.addEventListener('error', errorHandler);
+```
+
+### sendUserError
+
+```
+var error = new Error("Test Error");
+window.FirebasePlugin.sendUserError("Network Error", {url: 'http://www.google.com'});
+```
+
+### setCrashlyticsValue
+
+Set a key/value for Crashlytics. Those keys are attached to crash reports and can help figuring out what a user was doing before a crash.
+
+```
+window.FirebasePlugin.setCrashlyticsValue("my_key", "my_value");
+```
+
+### logCrashlytics
+
+Send a log to Crashlytics. These logs are attached to crash reports and can help figuring out what a user was doing before a crash.
+
+```
+window.FirebasePlugin.logCrashlytics("log message");
+```
+
+
+### onDynamicLink
+
+Register a callback to be called when your app is opened with a Dynamic Link. Only one callback can be registered at the same time, registering another callback will unset the first.
+
+```
+function onSuccess(eventData) {
+    // eventData = { deepLink: string, matchType: 'Weak'|'Strong' }
+    console.log("Received dynamic link: ", eventData)
+}
+function onError(error) {
+    console.log("Received dynamic link error: ", error)
+}
+
+window.FirebasePlugin.onDynamicLink(onSuccess, onError)
+```
+
 
 ### Phone Authentication
 **BASED ON THE CONTRIBUTIONS OF**

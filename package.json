@@ -8,7 +8,7 @@
     "url": "https://github.com/arnesson/cordova-plugin-firebase"
   },
   "name": "tobostudio.cordova-plugin-firebase",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "Cordova plugin for Google Firebase",
   "cordova": {
     "id": "tobostudio.cordova-plugin-firebase",

@@ -232,25 +232,6 @@
 #endif
 }
 
-#if defined(__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
-- (void)userNotificationCenter:(UNUserNotificationCenter *)center
-       willPresentNotification:(UNNotification *)notification
-         withCompletionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler {
-    NSDictionary *mutableUserInfo = [notification.request.content.userInfo mutableCopy];
-
-    [mutableUserInfo setValue:self.applicationInBackground forKey:@"tap"];
-
-    // Print full message.
-    NSLog(@"%@", mutableUserInfo);
-
-    if (![notification.request.trigger isKindOfClass:UNPushNotificationTrigger.class]) {
-        [self.delegate userNotificationCenter:center willPresentNotification:notification withCompletionHandler:completionHandler];
-        return;
-    }
-
-    [FirebasePlugin.firebasePlugin sendNotification:mutableUserInfo];
-}
-
 
 // [START ios_10_data_message]
 // Receive data messages on iOS 10+ directly from FCM (bypassing APNs) when the app is in the foreground.
@@ -276,8 +257,6 @@
 #if HAVE_BATCH
     [BatchPush handleUserNotificationCenter:center willPresentNotification:response.notification willShowSystemForegroundAlert:NO];
 #endif
-
-    completionHandler();
 }
 
 // Receive data message on iOS 10 devices.

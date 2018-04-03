@@ -92,71 +92,46 @@ static FirebasePlugin *firebasePlugin;
     CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:message];
     [self.commandDelegate sendPluginResult:commandResult callbackId:command.callbackId];
 }
+
 - (void)grantPermission:(CDVInvokedUrlCommand *)command {
-    if (floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_9_x_Max) {
-        if ([[UIApplication sharedApplication]respondsToSelector:@selector(registerUserNotificationSettings:)]) {
-            UIUserNotificationType notificationTypes =
+    
+    if (floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_7_1) {
+        // iOS 7.1 or earlier. Disable the deprecation warnings.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        UIRemoteNotificationType allNotificationTypes =
+        (UIRemoteNotificationTypeSound |
+         UIRemoteNotificationTypeAlert |
+         UIRemoteNotificationTypeBadge);
+        [[UIApplication sharedApplication] registerForRemoteNotificationTypes:allNotificationTypes];
+#pragma clang diagnostic pop
+    } else {
+        // iOS 8 or later
+        if (floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_9_x_Max) {
+            UIUserNotificationType allNotificationTypes =
             (UIUserNotificationTypeSound | UIUserNotificationTypeAlert | UIUserNotificationTypeBadge);
-            UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:notificationTypes categories:nil];
+            UIUserNotificationSettings *settings =
+            [UIUserNotificationSettings settingsForTypes:allNotificationTypes categories:nil];
             [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
-            [[UIApplication sharedApplication] registerForRemoteNotifications];
         } else {
-            #pragma GCC diagnostic push
-            #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-            [[UIApplication sharedApplication] registerForRemoteNotificationTypes:(UIRemoteNotificationTypeAlert | UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound)];
-            #pragma GCC diagnostic pop
+            // iOS 10 or later
+#if defined(__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+            // For iOS 10 display notification (sent via APNS)
+            [UNUserNotificationCenter currentNotificationCenter].delegate = self;
+            UNAuthorizationOptions authOptions =
+            UNAuthorizationOptionAlert
+            | UNAuthorizationOptionSound
+            | UNAuthorizationOptionBadge;
+            [[UNUserNotificationCenter currentNotificationCenter] requestAuthorizationWithOptions:authOptions completionHandler:^(BOOL granted, NSError * _Nullable error) {
+            }];
+#endif
         }
-
-		CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-		[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-		return;
+        [[UIApplication sharedApplication] registerForRemoteNotifications];
     }
-
-
-
-	#if defined(__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
-	BOOL isIOS10 = TRUE;
-	#else
-	BOOL isIOS10 = FALSE;
-	#endif
-
-
-	if ( !isIOS10 ) {
-		[[UIApplication sharedApplication] registerForRemoteNotifications];
-		CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-		[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-		return;
-	}
-
-
-
-	// IOS 10
-	UNAuthorizationOptions authOptions = UNAuthorizationOptionAlert|UNAuthorizationOptionSound|UNAuthorizationOptionBadge;
-	[[UNUserNotificationCenter currentNotificationCenter]
-		requestAuthorizationWithOptions:authOptions
-	 				  completionHandler:^(BOOL granted, NSError * _Nullable error) {
-
-			if ( ![NSThread isMainThread] ) {
-				dispatch_sync(dispatch_get_main_queue(), ^{
-					[[UNUserNotificationCenter currentNotificationCenter] setDelegate:self];
-					[[FIRMessaging messaging] setDelegate:self];
-					[[UIApplication sharedApplication] registerForRemoteNotifications];
-
-					CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus: granted ? CDVCommandStatus_OK : CDVCommandStatus_ERROR];
-					[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-				});
-			}
-			else {
-				[[UNUserNotificationCenter currentNotificationCenter] setDelegate:self];
-				[[FIRMessaging messaging] setDelegate:self];
-				[[UIApplication sharedApplication] registerForRemoteNotifications];
-				CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-				[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-			}
-	  }
-	];
-
-	return;
+    
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    return;
 }
 
 - (void)setBadgeNumber:(CDVInvokedUrlCommand *)command {

@@ -3,11 +3,11 @@
 #import "Firebase.h"
 #import <objc/runtime.h>
 
-#if __has_include("BatchCordovaPlugin.h")
-#define HAVE_BATCH 1
+#if __has_include(<BatchBridge/Batch.h>)
+#define NEEDS_BATCH_PATCH 1
 #import <BatchBridge/Batch.h>
 #else
-#define HAVE_BATCH 0
+#define NEEDS_BATCH_PATCH 0
 #endif
 
 
@@ -25,7 +25,7 @@
 
 #define kApplicationInBackgroundKey @"applicationInBackground"
 
-#if HAVE_BATCH
+#if NEEDS_BATCH_PATCH
 // --- Begin Batch Firebase cold start workaround ---
 @interface BAPushCenter : NSObject
 + (BAPushCenter*)instance;
@@ -185,7 +185,7 @@
 
     [FirebasePlugin.firebasePlugin sendNotification:mutableUserInfo];
         
-#if HAVE_BATCH
+#if NEEDS_BATCH_PATCH
     // --- Begin Batch Firebase cold start workaround ---
     if ([BAPushCenter class]) {
         [BAPushCenter instance].startPushUserInfo = userInfo;
@@ -216,7 +216,7 @@
 
     [FirebasePlugin.firebasePlugin sendNotification:mutableUserInfo];
      
-#if HAVE_BATCH
+#if NEEDS_BATCH_PATCH
     [BatchPush handleUserNotificationCenter:center willPresentNotification:notification willShowSystemForegroundAlert:NO];
 #endif
 }

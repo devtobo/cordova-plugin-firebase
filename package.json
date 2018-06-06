@@ -5,10 +5,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/arnesson/cordova-plugin-firebase"
+    "url": "https://github.com/devtobo/cordova-plugin-firebase"
   },
   "name": "tobostudio.cordova-plugin-firebase",
-  "version": "2.1.3",
+  "version": "2.1.4",
   "description": "Cordova plugin for Google Firebase",
   "cordova": {
     "id": "tobostudio.cordova-plugin-firebase",

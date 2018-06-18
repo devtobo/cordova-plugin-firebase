@@ -173,6 +173,12 @@ exports.sendImmediateTraceCounter = function(traceName, counterName, counterValu
 
 exports.onDynamicLink = function(success, error) {
     exec(success, error, "FirebasePlugin", "onDynamicLink", []);
-}
+};
+
+// Report Cache Size
+
+exports.reportCacheSize = function(success, error) {
+    exec(success, error, "FirebasePlugin", "reportCacheSize", []);
+};
 
 

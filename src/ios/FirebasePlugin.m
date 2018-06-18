@@ -5,6 +5,8 @@
 #import <Crashlytics/Crashlytics.h>
 #import <FirebasePerformance/FirebasePerformance.h>
 #import <Fabric/Fabric.h>
+#import "NSFileManager+NRFileManager.h"
+
 @import FirebaseInstanceID;
 @import FirebaseMessaging;
 @import FirebaseAnalytics;
@@ -559,5 +561,26 @@ static FirebasePlugin *firebasePlugin;
     }
 }
 
+
+#pragma mark - Report Cache Size
+
+- (void)reportCacheSize:(CDVInvokedUrlCommand *)command {
+    
+    NSFileManager *fm = [NSFileManager defaultManager];
+    unsigned long long cache = ([fm calculateCacheSize]) / (1000 * 1000);
+    unsigned long long docs = ([fm calculateDocsSize]) / (1000 * 1000);
+    unsigned long long library = ([fm calculateLibrarySize]) / (1000 * 1000);
+
+    FIRTrace *trace = [FIRPerformance startTraceWithName:@"cache_size_report"];
+    [trace incrementCounterNamed:@"cache_size_mo" by:cache];
+    [trace incrementCounterNamed:@"docs_size_mo" by:docs];
+    [trace incrementCounterNamed:@"library_size_mo" by:library];
+    [trace stop];
+    
+    NSLog(@"reportCacheSize: cache=%lld docs=%lld library=%lld", cache, docs, library);
+
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
 
 @end

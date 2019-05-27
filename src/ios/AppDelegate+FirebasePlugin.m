@@ -3,9 +3,9 @@
 #import "Firebase.h"
 #import <objc/runtime.h>
 
-#if __has_include(<BatchBridge/Batch.h>)
+#if __has_include(<Batch/Batch.h>)
 #define NEEDS_BATCH_PATCH 1
-#import <BatchBridge/Batch.h>
+#import <Batch/Batch.h>
 #else
 #define NEEDS_BATCH_PATCH 0
 #endif
@@ -109,9 +109,9 @@
     // [START set_messaging_delegate]
     [FIRMessaging messaging].delegate = self;
     // [END set_messaging_delegate]
-#if defined(__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+#if defined(__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0 && NEEDS_BATCH_PATCH == 0
     self.delegate = [UNUserNotificationCenter currentNotificationCenter].delegate;
-        [UNUserNotificationCenter currentNotificationCenter].delegate = self;
+    [UNUserNotificationCenter currentNotificationCenter].delegate = self;
 #endif
 
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tokenRefreshNotification:)

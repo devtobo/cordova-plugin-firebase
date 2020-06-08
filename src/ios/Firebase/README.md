@@ -1,6 +1,6 @@
 # MODIFICATIONS
 
-This is a pruned copy of the 5.7.0 version of the Firebase SDK Frameworks.  Any Frameworks that aren't currently used have been removed (along with duplicate Framework references) to reduce the size of the directory.  
+This is a pruned copy of the 6.26.9 version of the Firebase SDK Frameworks.  Any Frameworks that aren't currently used have been removed (along with duplicate Framework references) to reduce the size of the directory.  
 
 # Firebase iOS SDKs
 
@@ -80,7 +80,6 @@ NOTE: If you are upgrading FirebaseAnalytics from before Firebase 5.5.0,
   - FirebaseAnalytics.framework
   - FirebaseCoreDiagnostics.framework
   - FirebaseCore.framework
-  - FirebaseInstanceID.framework
   - GoogleAppMeasurement.framework
   - MeasurementNanoPB.framework
   - GoogleUtilities.framework
@@ -139,6 +138,7 @@ NOTE: If you are upgrading FirebaseAnalytics from before Firebase 5.5.0,
   bundle.
 ## Messaging (~> Analytics)
   - FirebaseMessaging.framework
+  - FirebaseInstanceID.framework
   - Protobuf.framework
 ## MLModelInterpreter (~> Analytics)
   - FirebaseMLCommon.framework
@@ -248,7 +248,7 @@ CocoaPods.
            CocoaPod           | Version
 ----------------------------- | -------
 BoringSSL                     | 10.0.6
-Firebase                      | 5.7.0
+Firebase                      | 6.26.9
 FirebaseABTesting             | 2.0.0
 FirebaseAnalytics             | 5.1.1
 FirebaseAuth                  | 5.0.3

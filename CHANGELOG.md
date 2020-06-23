@@ -1,3 +1,8 @@
+# Version 2.0.6
+
+### Bug Fixes
+- <a href="https://github.com/devtobo/cordova-plugin-firebase/pull/1">#PR_1</a>: Updated firebase IOS SDK
+
 # Version 2.0.5
 
 ### Bug Fixes

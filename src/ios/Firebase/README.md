@@ -77,21 +77,20 @@ NOTE: If you are upgrading FirebaseAnalytics from before Firebase 5.5.0,
       no longer provides any functionality.
 
 ## Analytics
-  - FirebaseAnalytics.framework
-  - FirebaseCoreDiagnostics.framework
-  - FirebaseCore.framework
   - GoogleAppMeasurement.framework
-  - MeasurementNanoPB.framework
-  - GoogleUtilities.framework
-  - nanopb.framework
-## ABTesting (~> Analytics)
+  - FirebaseCore.xcframework
+  - FirebaseAnalytics.framework
+  - GoogleUtilities.xcframework
+  - nanopb.xcframework
+  - FirebaseCoreDiagnostics.xcframework
+## A~> Analytics)
   - FirebaseABTesting.framework
   - Protobuf.framework
 ## AdMob (~> Analytics)
   - GoogleMobileAds.framework
 ## Auth (~> Analytics)
-  - FirebaseAuth.framework
-  - GTMSessionFetcher.framework
+  - GTMSessionFetcher.xcframework
+  - FirebaseAuth.xcframework
 ## Crash (~> Analytics)
   - FirebaseCrash.framework
   - GoogleToolboxForMac.framework
@@ -100,7 +99,7 @@ NOTE: If you are upgrading FirebaseAnalytics from before Firebase 5.5.0,
   - FirebaseDatabase.framework
   - leveldb-library.framework
 ## DynamicLinks (~> Analytics)
-  - FirebaseDynamicLinks.framework
+  - FirebaseDynamicLinks.xcframework
 ## Firestore (~> Analytics)
   - BoringSSL.framework
   - FirebaseFirestore.framework
@@ -137,8 +136,8 @@ NOTE: If you are upgrading FirebaseAnalytics from before Firebase 5.5.0,
   Resources directory into your target's main
   bundle.
 ## Messaging (~> Analytics)
-  - FirebaseMessaging.framework
-  - FirebaseInstanceID.framework
+  - FirebaseMessaging.xcframework
+  - FirebaseInstanceID.xcframework
   - Protobuf.framework
 ## MLModelInterpreter (~> Analytics)
   - FirebaseMLCommon.framework
@@ -218,14 +217,14 @@ NOTE: If you are upgrading FirebaseAnalytics from before Firebase 5.5.0,
   Resources directory into your target's main
   bundle.
 ## Performance (~> Analytics)
-  - FirebasePerformance.framework
-  - GTMSessionFetcher.framework
+  - FirebasePerformance.xcframework
+  - GTMSessionFetcher.xcframework
   - GoogleToolboxForMac.framework
   - Protobuf.framework
 ## RemoteConfig (~> Analytics)
-  - FirebaseABTesting.framework
-  - FirebaseRemoteConfig.framework
-  - Protobuf.framework
+  - FirebaseABTesting.xcframework
+  - FirebaseRemoteConfig.xcframework
+  - Protobuf.xcframework
 ## Storage (~> Analytics)
   - FirebaseStorage.framework
   - GTMSessionFetcher.framework

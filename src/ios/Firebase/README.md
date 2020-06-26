@@ -1,6 +1,6 @@
 # MODIFICATIONS
 
-This is a pruned copy of the 6.26.9 version of the Firebase SDK Frameworks.  Any Frameworks that aren't currently used have been removed (along with duplicate Framework references) to reduce the size of the directory.  
+This is a pruned copy of the 5.7.0 version of the Firebase SDK Frameworks.  Any Frameworks that aren't currently used have been removed (along with duplicate Framework references) to reduce the size of the directory.  
 
 # Firebase iOS SDKs
 
@@ -77,20 +77,25 @@ NOTE: If you are upgrading FirebaseAnalytics from before Firebase 5.5.0,
       no longer provides any functionality.
 
 ## Analytics
-  - GoogleAppMeasurement.framework
-  - FirebaseCore.xcframework
   - FirebaseAnalytics.framework
-  - GoogleUtilities.xcframework
-  - nanopb.xcframework
-  - FirebaseCoreDiagnostics.xcframework
-## A~> Analytics)
+  - FirebaseCoreDiagnostics.framework
+  - FirebaseCore.framework
+<<<<<<< Updated upstream
+=======
+  - FirebaseInstanceID.framework
+>>>>>>> Stashed changes
+  - GoogleAppMeasurement.framework
+  - MeasurementNanoPB.framework
+  - GoogleUtilities.framework
+  - nanopb.framework
+## ABTesting (~> Analytics)
   - FirebaseABTesting.framework
   - Protobuf.framework
 ## AdMob (~> Analytics)
   - GoogleMobileAds.framework
 ## Auth (~> Analytics)
-  - GTMSessionFetcher.xcframework
-  - FirebaseAuth.xcframework
+  - FirebaseAuth.framework
+  - GTMSessionFetcher.framework
 ## Crash (~> Analytics)
   - FirebaseCrash.framework
   - GoogleToolboxForMac.framework
@@ -99,7 +104,7 @@ NOTE: If you are upgrading FirebaseAnalytics from before Firebase 5.5.0,
   - FirebaseDatabase.framework
   - leveldb-library.framework
 ## DynamicLinks (~> Analytics)
-  - FirebaseDynamicLinks.xcframework
+  - FirebaseDynamicLinks.framework
 ## Firestore (~> Analytics)
   - BoringSSL.framework
   - FirebaseFirestore.framework
@@ -136,8 +141,11 @@ NOTE: If you are upgrading FirebaseAnalytics from before Firebase 5.5.0,
   Resources directory into your target's main
   bundle.
 ## Messaging (~> Analytics)
-  - FirebaseMessaging.xcframework
-  - FirebaseInstanceID.xcframework
+  - FirebaseMessaging.framework
+<<<<<<< Updated upstream
+  - FirebaseInstanceID.framework
+=======
+>>>>>>> Stashed changes
   - Protobuf.framework
 ## MLModelInterpreter (~> Analytics)
   - FirebaseMLCommon.framework
@@ -217,14 +225,14 @@ NOTE: If you are upgrading FirebaseAnalytics from before Firebase 5.5.0,
   Resources directory into your target's main
   bundle.
 ## Performance (~> Analytics)
-  - FirebasePerformance.xcframework
-  - GTMSessionFetcher.xcframework
+  - FirebasePerformance.framework
+  - GTMSessionFetcher.framework
   - GoogleToolboxForMac.framework
   - Protobuf.framework
 ## RemoteConfig (~> Analytics)
-  - FirebaseABTesting.xcframework
-  - FirebaseRemoteConfig.xcframework
-  - Protobuf.xcframework
+  - FirebaseABTesting.framework
+  - FirebaseRemoteConfig.framework
+  - Protobuf.framework
 ## Storage (~> Analytics)
   - FirebaseStorage.framework
   - GTMSessionFetcher.framework
@@ -247,7 +255,7 @@ CocoaPods.
            CocoaPod           | Version
 ----------------------------- | -------
 BoringSSL                     | 10.0.6
-Firebase                      | 6.26.9
+Firebase                      | 5.7.0
 FirebaseABTesting             | 2.0.0
 FirebaseAnalytics             | 5.1.1
 FirebaseAuth                  | 5.0.3
